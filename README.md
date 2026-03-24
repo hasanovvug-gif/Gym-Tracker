@@ -1,4 +1,3 @@
-This is a solid pitch for a fitness app! It strikes a great balance between automated tracking and intelligent feedback. Here is the English translation, keeping that punchy, "app-store-ready" tone.
 
 🏋️ Gym Tracker — What is this app?
 Gym Tracker is a smart personal workout log powered by an AI Coach. Here are the key features:
