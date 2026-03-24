@@ -1,0 +1,5 @@
+{
+  "name": "Gym Tracker App",
+  "description": "Персональное мобильное приложение для сопровождения тренировок в зале для Вугара.",
+  "requestFramePermissions": []
+}
