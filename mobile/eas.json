@@ -1,0 +1,28 @@
+{
+  "cli": {
+    "version": ">= 20.0.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true,
+      "credentialsSource": "local"
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "ascApiKeyPath": "/Users/woo/.appstoreconnect/private/AuthKey_XC65QPNJJK.p8",
+        "ascApiKeyId": "XC65QPNJJK",
+        "ascApiKeyIssuerId": "aa143c58-e40f-4d4f-b5a4-b7e7d87c2071"
+      }
+    }
+  }
+}

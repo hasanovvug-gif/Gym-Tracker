@@ -39,3 +39,6 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
+
+# EAS local credentials (пути на ключи вне репозитория)
+credentials.json

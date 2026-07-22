@@ -9,8 +9,11 @@
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.vugarhasanov.gymtracker"
+      "supportsTablet": false,
+      "bundleIdentifier": "com.vugarhasanov.gymtracker",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -18,7 +21,11 @@
         "backgroundColor": "#0B0C0E"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.vugarhasanov.gymtracker"
+      "package": "com.vugarhasanov.gymtracker",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -41,6 +48,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1d1006a8-2d5d-4ad2-9fed-7ee90393a8f5"
+      }
+    },
+    "owner": "vugarapple"
   }
 }
