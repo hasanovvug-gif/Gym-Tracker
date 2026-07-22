@@ -16,13 +16,15 @@ updated: 2026-07-22 20:10
 
 ## Next step
 
-Три заглушки закрыты, изменения **не закоммичены** — лежат в рабочем дереве `main`.
-Перед коммитом: проверить `mobile/package-lock.json` (при установке `expo-file-system` /
-`expo-sharing` он похудел на 548 строк — `npm ls` чистый, но глазами не смотрели).
+Всё закоммичено в `main` (`d3a4d5b`), **не запушено** — при желании `git push`.
 
-Дальше: прогнать флоу на реальном айфоне через Expo Go (`cd mobile && npx expo start`,
-в Expo Go открыть `exp://<LAN-IP>:8081`) — для симулятора сначала нужен
-`sudo xcode-select -s /Applications/Xcode.app/Contents/Developer` (пароль Вугара).
+Дальше по приоритету:
+1. Заменить шрифт **Archivo** — в нём нет кириллицы, весь RU/UA текст рендерится
+   системным fallback'ом. Кандидаты: Manrope, IBM Plex Sans. Заголовки (Oswald) — ок.
+2. Прогнать флоу на реальном айфоне через Expo Go (`cd mobile && npx expo start`,
+   в Expo Go открыть `exp://<LAN-IP>:8081`). Для симулятора нужен пароль Вугара:
+   `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
+3. Нативный share-sheet экспорта живьём не проверялся — только веб-скачивание.
 
 ## Done (recent first, max 10)
 
@@ -44,8 +46,8 @@ updated: 2026-07-22 20:10
 
 ## TODO (priority)
 
-- [ ] Закоммитить всё сделанное (сначала глянуть `package-lock.json`)
 - [ ] Шрифт Archivo без кириллицы — RU/UA текст падает на системный fallback, нужна замена
+- [ ] Запушить `d3a4d5b` в origin
 - [ ] Прогнать полный флоу тренировки на реальном айфоне (Expo Go)
 - [ ] Нативный share-sheet экспорта не проверен вживую — только веб-скачивание
 - [ ] Drag-and-drop reorder в редакторе плана — сейчас кнопки ↑↓
@@ -90,8 +92,8 @@ updated: 2026-07-22 20:10
 
 ## Working state
 
-- Branch: `main` (всё влито, синхронно с origin). `feat/mobile-expo-app` отработала, можно удалить
+- Branch: `main`, рабочее дерево чистое, локально на 1 коммит впереди origin
 - Worktree: `~/Documents/Projects/Gym-Tracker`
-- Last meaningful commit: `694d48b` — merge feat/mobile-expo-app → main
+- Last meaningful commit: `d3a4d5b` — светлая тема, i18n, экспорт, онбординг (не запушен)
 - Приложение: `mobile/`, bundle id `com.vugarhasanov.gymtracker`
 - Запуск: `cd mobile && npx expo start` · симулятор — `npx expo run:ios`
