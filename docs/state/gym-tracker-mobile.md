@@ -2,7 +2,7 @@
 campaign: gym-tracker-mobile
 status: active
 started: 2026-07-22
-updated: 2026-07-23 00:40
+updated: 2026-07-23 01:20
 ---
 
 # Gym Tracker → Expo/React Native
@@ -18,20 +18,21 @@ updated: 2026-07-23 00:40
 
 Всё закоммичено и запушено в `main`, рабочее дерево чистое. Приложение
 функционально закрыто: экраны, флоу, темы, три языка, экспорт, онбординг,
-звук, тактильность. Вугар прогнал полный флоу на айфоне — работает.
-
-**Иконка выбрана — K6f, «гриф в ромбе»**: `design/icon-concepts/selected-icon.svg`
-(он же `king/k6f-bar.svg`). Дальше — только сборка ассетов, дизайн-решений не осталось.
+звук, тактильность. **Ассеты иконки собраны и лежат в `mobile/assets/images/`** —
+дефолтных картинок Expo больше нет.
 
 Дальше по приоритету:
-1. **Собрать ассеты из `selected-icon.svg`:** `icon.png` 1024×1024 →
-   `mobile/assets/images/`, adaptive под Android (передний слой отдельно от фона
-   `#0B0C0E`), splash под обе темы (`#0B0C0E` / `#F4F5F3`). Конвертер на машине —
-   только `qlmanage -t -s 1024 -o png <svg>`; rsvg/cairosvg/inkscape не установлены.
-2. Публикация в App Store (нужен Apple Developer аккаунт, EAS-сборка, скриншоты).
+1. **Публикация в App Store** — нужен Apple Developer аккаунт, EAS-сборка, скриншоты.
+2. Splash живьём (на нативной сборке) не проверялся — PNG на месте, но
+   `expo prebuild`/`run:ios` после замены ассетов не гонялся.
 3. Нативный share-sheet экспорта живьём не проверялся — только веб-скачивание.
 
 ## Done (recent first, max 10)
+
+- 2026-07-23 — **Ассеты иконки собраны** (`a9891f1`): `icon.png` 1024 (фон `#0B0C0E`),
+  `adaptive-icon.png` (прозрачный передний слой, арт ужат до 66 % — safe zone Android),
+  `splash-icon.png` 512 прозрачный, `favicon.png` 196. Скрипт —
+  `design/icon-concepts/build-assets.py` (PIL, 4× суперсэмплинг; SVG-конвертера нет)
 
 - 2026-07-23 — **Иконка выбрана: K6f**, гриф в ромбе, семейство с AsbestosGuard
   (`0584856`). Отклонённые лежат рядом: мои K1–K6 в `king/`, Codex Sol V1–V4 в
@@ -70,8 +71,7 @@ updated: 2026-07-23 00:40
 - [ ] Оценить вживую тембр бипа и частоту вибрации на реальном телефоне
 - [ ] Нативный share-sheet экспорта не проверен вживую — только веб-скачивание
 - [ ] Drag-and-drop reorder в редакторе плана — сейчас кнопки ↑↓
-- [ ] Собрать иконку + adaptive + splash из `design/icon-concepts/selected-icon.svg`
-      — сейчас в приложении всё ещё дефолтные ассеты Expo
+- [ ] Проверить splash на нативной сборке (`expo prebuild` + `run:ios`) после замены ассетов
 - [ ] Публикация в App Store
 
 ## Decisions (non-obvious, durable)
@@ -128,6 +128,6 @@ updated: 2026-07-23 00:40
 
 - Branch: `main`, рабочее дерево чистое, синхронно с origin
 - Worktree: `~/Documents/Projects/Gym-Tracker`
-- Last meaningful commit: `0584856` — выбрана иконка K6f (запушен)
+- Last meaningful commit: `a9891f1` — собраны ассеты иконки (запушен)
 - Приложение: `mobile/`, bundle id `com.vugarhasanov.gymtracker`
 - Запуск: `cd mobile && npx expo start` · симулятор — `npx expo run:ios`
