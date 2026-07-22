@@ -2,7 +2,7 @@
 campaign: gym-tracker-mobile
 status: active
 started: 2026-07-22
-updated: 2026-07-22 14:52
+updated: 2026-07-22 15:05
 ---
 
 # Gym Tracker → Expo/React Native
@@ -11,16 +11,18 @@ updated: 2026-07-22 14:52
 
 Приложение полностью реализовано на Expo/RN (SDK 54): все экраны из дизайна, полный флоу
 тренировки, добавки, история, настройки. Проверено визуально в симуляторе iPhone 17 Pro
-и в браузере. Ветка `feat/mobile-expo-app` запушена в origin, PR не открывался.
+и в браузере. **Всё влито в `main` и запушено** (`694d48b`) — работа идёт прямо в `main`.
 Старый Vite-прототип в `src/` оставлен как есть — только референс.
 
 ## Next step
 
-Прогнать полный флоу тренировки на реальном айфоне через Expo Go (`exp://<LAN-IP>:8081`),
-затем закрывать заглушки: светлая тема, переводы UA/EN, экспорт данных.
+Прогнать полный флоу тренировки на реальном айфоне через Expo Go: `cd mobile && npx expo start`,
+затем в Expo Go открыть `exp://<LAN-IP>:8081` (телефон в той же Wi-Fi, SDK совпадает — 54).
+После этого закрывать заглушки: светлая тема, переводы UA/EN, экспорт данных.
 
 ## Done (recent first, max 10)
 
+- 2026-07-22 — `feat/mobile-expo-app` влита в `main` и запушена (`694d48b`, merge --no-ff)
 - 2026-07-22 — Апгрейд Expo SDK 53 → 54, нативная сборка iOS проходит (`276d696`)
 - 2026-07-22 — Полная реализация всех экранов и логики, сделана Codex Sol, верифицирована (`df76b0b`)
 - 2026-07-22 — Скаффолд Expo + дизайн-система (цвета, Oswald/Archivo) + 5-табная навигация
@@ -66,8 +68,8 @@ updated: 2026-07-22 14:52
 
 ## Working state
 
-- Branch: `feat/mobile-expo-app` (запушена, отслеживает origin; PR не открыт)
+- Branch: `main` (всё влито, синхронно с origin). `feat/mobile-expo-app` отработала, можно удалить
 - Worktree: `~/Documents/Projects/Gym-Tracker`
-- Last meaningful commit: `276d696` — chore(mobile): upgrade expo sdk to 54
+- Last meaningful commit: `694d48b` — merge feat/mobile-expo-app → main
 - Приложение: `mobile/`, bundle id `com.vugarhasanov.gymtracker`
 - Запуск: `cd mobile && npx expo start` · симулятор — `npx expo run:ios`
