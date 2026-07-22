@@ -5,26 +5,32 @@ export function formatDuration(seconds: number) {
   return `${minutes}:${String(remainder).padStart(2, '0')}`;
 }
 
-export function formatNumber(value: number) {
-  return new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 }).format(value);
+export type FormatLanguage = 'RU' | 'UA' | 'EN';
+
+const locales: Record<FormatLanguage, string> = { RU: 'ru-RU', UA: 'uk-UA', EN: 'en-GB' };
+
+export function formatNumber(value: number, language: FormatLanguage = 'RU') {
+  return new Intl.NumberFormat(locales[language], { maximumFractionDigits: 0 }).format(value);
 }
 
-export function formatShortDate(iso: string) {
-  return new Intl.DateTimeFormat('ru-RU', { weekday: 'short', day: 'numeric', month: 'long' })
+export function formatShortDate(iso: string, language: FormatLanguage = 'RU') {
+  return new Intl.DateTimeFormat(locales[language], { weekday: 'short', day: 'numeric', month: 'long' })
     .format(new Date(iso))
     .replace('.', '');
 }
 
-export function formatToday() {
-  const text = new Intl.DateTimeFormat('ru-RU', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+export function formatToday(language: FormatLanguage = 'RU') {
+  const text = new Intl.DateTimeFormat(locales[language], { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-export function pluralize(value: number, forms: [string, string, string]) {
+export function pluralize(value: number, forms: [string, string, string] | [string, string], language: FormatLanguage) {
+  if (language === 'EN') return forms[value === 1 ? 0 : 1];
+  const slavicForms = forms as [string, string, string];
   const lastTwo = value % 100;
   const last = value % 10;
-  if (lastTwo >= 11 && lastTwo <= 14) return forms[2];
-  if (last === 1) return forms[0];
-  if (last >= 2 && last <= 4) return forms[1];
-  return forms[2];
+  if (lastTwo >= 11 && lastTwo <= 14) return slavicForms[2];
+  if (last === 1) return slavicForms[0];
+  if (last >= 2 && last <= 4) return slavicForms[1];
+  return slavicForms[2];
 }

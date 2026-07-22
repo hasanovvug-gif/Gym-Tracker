@@ -1,81 +1,94 @@
+import { useMemo } from 'react';
 import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Heading, Screen, Toggle } from '@/components/ui';
-import { colors, fonts } from '@/constants/theme';
+import { fonts, Palette } from '@/constants/theme';
+import { useTheme } from '@/hooks/useTheme';
 import { useGymStore } from '@/store/useGymStore';
+import { exportGymData } from '@/utils/exportData';
+import { useT } from '@/i18n';
+
+function useThemedStyles() {
+  const c = useTheme();
+  const styles = useMemo(() => createStyles(c), [c]);
+  return { c, styles };
+}
 
 export default function SettingsScreen() {
+  const { c, styles } = useThemedStyles();
   const historyCount = useGymStore((state) => state.history.length);
   const settings = useGymStore((state) => state.settings);
-  const { setLanguage, setTheme, toggleNotification, resetAll } = useGymStore();
+  const { setLanguage, setTheme, setOnboardingSeen, toggleNotification, resetAll } = useGymStore();
+  const { t, language } = useT();
 
   const confirmReset = () => {
-    const message = 'История и отметки приёма будут удалены. План, добавки и настройки вернутся к исходным.';
+    const message = t('settings.resetMessage');
     if (Platform.OS === 'web') {
-      if (window.confirm(`Сбросить все данные?\n\n${message}`)) resetAll();
+      if (window.confirm(`${t('settings.resetTitle')}\n\n${message}`)) resetAll();
       return;
     }
-    Alert.alert('Сбросить все данные?', message, [
-      { text: 'Отмена', style: 'cancel' },
-      { text: 'Сбросить', style: 'destructive', onPress: resetAll },
+    Alert.alert(t('settings.resetTitle'), message, [
+      { text: t('common.cancel'), style: 'cancel' },
+      { text: t('settings.reset'), style: 'destructive', onPress: resetAll },
     ]);
   };
 
   return (
     <Screen>
-      <Heading>Настройки</Heading>
+      <Heading>{t('settings.title')}</Heading>
       <Card style={styles.profile}>
-        <View style={styles.avatar}><Text style={styles.avatarText}>В</Text></View>
-        <View style={styles.flex}><Text style={styles.name}>Вугар</Text><Text style={styles.profileMeta}>с апреля 2026 · {historyCount} тренировок</Text></View>
+        <View style={styles.avatar}><Text style={styles.avatarText}>{t('settings.name').charAt(0)}</Text></View>
+        <View style={styles.flex}><Text style={styles.name}>{t('settings.name')}</Text><Text style={styles.profileMeta}>{t('settings.profile', { count: historyCount })}</Text></View>
       </Card>
 
       <Card style={styles.groupCard}>
         <View style={[styles.settingRow, styles.rowBorder]}>
-          <Text style={styles.settingLabel}>Язык</Text>
+          <Text style={styles.settingLabel}>{t('settings.language')}</Text>
           <View style={styles.choiceRow}>
             {(['RU', 'UA', 'EN'] as const).map((language) => <Choice key={language} label={language} selected={settings.language === language} onPress={() => setLanguage(language)} />)}
           </View>
         </View>
         <View style={styles.settingRow}>
-          <Text style={styles.settingLabel}>Тема</Text>
+          <Text style={styles.settingLabel}>{t('settings.theme')}</Text>
           <View style={styles.choiceRow}>
-            {/* TODO: подключить светлую палитру; выбор уже сохраняется. */}
-            <Choice label="Светлая" selected={settings.theme === 'light'} onPress={() => setTheme('light')} />
-            <Choice label="Тёмная" selected={settings.theme === 'dark'} onPress={() => setTheme('dark')} />
+            <Choice label={t('settings.light')} selected={settings.theme === 'light'} onPress={() => setTheme('light')} />
+            <Choice label={t('settings.dark')} selected={settings.theme === 'dark'} onPress={() => setTheme('dark')} />
           </View>
         </View>
-        {/* TODO: локализовать тексты экранов для UA/EN; селектор состояния готов. */}
       </Card>
 
       <Card style={styles.groupCard}>
         <SettingToggle
-          title="Напоминание о тренировке"
-          subtitle="в дни по плану, 18:00"
+          title={t('settings.workoutReminder')}
+          subtitle={t('settings.workoutReminderHint')}
           value={settings.notifications.workout}
           onPress={() => toggleNotification('workout')}
           border
         />
         <SettingToggle
-          title="Напоминание о добавках"
-          subtitle="утро · перед трен. · вечер"
+          title={t('settings.supplementReminder')}
+          subtitle={t('settings.supplementReminderHint')}
           value={settings.notifications.supplements}
           onPress={() => toggleNotification('supplements')}
           border
         />
         <SettingToggle
-          title="Звук rest-таймера"
-          subtitle="сигнал «пора начинать подход»"
+          title={t('settings.restSound')}
+          subtitle={t('settings.restSoundHint')}
           value={settings.notifications.sound}
           onPress={() => toggleNotification('sound')}
         />
       </Card>
 
       <Card style={styles.groupCard}>
-        <Pressable onPress={() => Alert.alert('Экспорт данных', 'Экспорт появится в следующей версии.')} style={[styles.actionRow, styles.rowBorder]}>
-          <Text style={styles.actionText}>Экспорт данных</Text><Text style={styles.chevron}>›</Text>
+        <Pressable onPress={() => exportGymData(language)} style={[styles.actionRow, styles.rowBorder]}>
+          <Text style={styles.actionText}>{t('settings.export')}</Text><Text style={styles.chevron}>›</Text>
+        </Pressable>
+        <Pressable onPress={() => setOnboardingSeen(false)} style={[styles.actionRow, styles.rowBorder]}>
+          <Text style={styles.actionText}>{t('settings.showOnboarding')}</Text><Text style={styles.chevron}>›</Text>
         </Pressable>
         <Pressable onPress={confirmReset} style={styles.actionRow}>
-          <Text style={[styles.actionText, { color: colors.danger }]}>Сбросить все данные</Text><Text style={styles.chevron}>›</Text>
+          <Text style={[styles.actionText, { color: c.danger }]}>{t('settings.reset')}</Text><Text style={styles.chevron}>›</Text>
         </Pressable>
       </Card>
     </Screen>
@@ -83,6 +96,7 @@ export default function SettingsScreen() {
 }
 
 function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
+  const { styles } = useThemedStyles();
   return (
     <Pressable onPress={onPress} accessibilityState={{ selected }} style={[styles.choice, selected && styles.choiceSelected]}>
       <Text style={[styles.choiceText, selected && styles.choiceTextSelected]}>{label}</Text>
@@ -91,6 +105,7 @@ function Choice({ label, selected, onPress }: { label: string; selected: boolean
 }
 
 function SettingToggle({ title, subtitle, value, onPress, border = false }: { title: string; subtitle: string; value: boolean; onPress: () => void; border?: boolean }) {
+  const { styles } = useThemedStyles();
   return (
     <View style={[styles.toggleRow, border && styles.rowBorder]}>
       <View style={styles.flex}><Text style={styles.settingLabel}>{title}</Text><Text style={styles.settingSubtitle}>{subtitle}</Text></View>
@@ -99,25 +114,25 @@ function SettingToggle({ title, subtitle, value, onPress, border = false }: { ti
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (c: Palette) => StyleSheet.create({
   profile: { flexDirection: 'row', alignItems: 'center', gap: 13 },
-  avatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: colors.accent, alignItems: 'center', justifyContent: 'center' },
-  avatarText: { color: colors.accentText, fontFamily: fonts.heading, fontSize: 20 },
+  avatar: { width: 52, height: 52, borderRadius: 26, backgroundColor: c.accent, alignItems: 'center', justifyContent: 'center' },
+  avatarText: { color: c.accentText, fontFamily: fonts.heading, fontSize: 20 },
   flex: { flex: 1 },
-  name: { color: colors.textPrimary, fontFamily: fonts.bodyBold, fontSize: 16 },
-  profileMeta: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 12, marginTop: 3 },
+  name: { color: c.textPrimary, fontFamily: fonts.bodyBold, fontSize: 16 },
+  profileMeta: { color: c.textSecondary, fontFamily: fonts.body, fontSize: 12, marginTop: 3 },
   groupCard: { paddingHorizontal: 15, paddingVertical: 2 },
   settingRow: { minHeight: 62, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 10 },
-  rowBorder: { borderBottomWidth: 1, borderBottomColor: '#1C1F24' },
-  settingLabel: { color: colors.textPrimary, fontFamily: fonts.bodySemiBold, fontSize: 14 },
+  rowBorder: { borderBottomWidth: 1, borderBottomColor: c.divider },
+  settingLabel: { color: c.textPrimary, fontFamily: fonts.bodySemiBold, fontSize: 14 },
   choiceRow: { flexDirection: 'row', gap: 5 },
-  choice: { minHeight: 38, borderWidth: 1, borderColor: colors.borderDashed, borderRadius: 10, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center' },
-  choiceSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
-  choiceText: { color: colors.textSecondary, fontFamily: fonts.bodySemiBold, fontSize: 11 },
-  choiceTextSelected: { color: colors.accentText, fontFamily: fonts.bodyExtraBold },
+  choice: { minHeight: 38, borderWidth: 1, borderColor: c.borderDashed, borderRadius: 10, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center' },
+  choiceSelected: { backgroundColor: c.accent, borderColor: c.accent },
+  choiceText: { color: c.textSecondary, fontFamily: fonts.bodySemiBold, fontSize: 11 },
+  choiceTextSelected: { color: c.accentText, fontFamily: fonts.bodyExtraBold },
   toggleRow: { minHeight: 68, flexDirection: 'row', alignItems: 'center', gap: 10 },
-  settingSubtitle: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 11, marginTop: 3 },
+  settingSubtitle: { color: c.textSecondary, fontFamily: fonts.body, fontSize: 11, marginTop: 3 },
   actionRow: { minHeight: 58, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  actionText: { color: colors.textPrimary, fontFamily: fonts.bodySemiBold, fontSize: 14 },
-  chevron: { color: colors.textMuted, fontFamily: fonts.body, fontSize: 20 },
+  actionText: { color: c.textPrimary, fontFamily: fonts.bodySemiBold, fontSize: 14 },
+  chevron: { color: c.textMuted, fontFamily: fonts.body, fontSize: 20 },
 });

@@ -1,13 +1,19 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Card, Heading, PrimaryButton, Screen } from '@/components/ui';
-import { colors, fonts } from '@/constants/theme';
+import { fonts, Palette } from '@/constants/theme';
+import { useTheme } from '@/hooks/useTheme';
+import { useT } from '@/i18n';
+import { resolveDayName, resolveName } from '@/i18n/displayName';
 import { useGymStore } from '@/store/useGymStore';
 
 export default function WorkoutsScreen() {
+  const c = useTheme();
+  const styles = useMemo(() => createStyles(c), [c]);
   const router = useRouter();
+  const { t } = useT();
   const days = useGymStore((state) => state.workoutDays);
   const startWorkout = useGymStore((state) => state.startWorkout);
   const activeSession = useGymStore((state) => state.activeSession);
@@ -21,22 +27,22 @@ export default function WorkoutsScreen() {
   return (
     <Screen>
       <View style={styles.header}>
-        <Heading>Тренировки</Heading>
+        <Heading>{t('workouts.title')}</Heading>
         <Pressable onPress={() => router.push('/plan-editor')} style={styles.editButton}>
-          <Text style={styles.editText}>Ред. план</Text>
+          <Text style={styles.editText}>{t('workouts.editPlan')}</Text>
         </Pressable>
       </View>
 
       {activeSession && (
         <Card accent>
-          <Text style={styles.eyebrow}>Тренировка уже начата</Text>
-          <Text style={styles.activeTitle}>День {days.findIndex((day) => day.id === activeSession.dayId) + 1} — {activeSession.dayName}</Text>
-          <PrimaryButton label={activeSession.phase === 'paused' ? 'Продолжить' : 'Вернуться к тренировке'} onPress={() => router.push('/workout-session')} style={styles.resumeButton} />
+          <Text style={styles.eyebrow}>{t('workouts.alreadyStarted')}</Text>
+          <Text style={styles.activeTitle}>{t('home.planTitle', { day: days.findIndex((day) => day.id === activeSession.dayId) + 1, name: resolveDayName(activeSession, t) })}</Text>
+          <PrimaryButton label={activeSession.phase === 'paused' ? t('common.continue') : t('workouts.returnToWorkout')} onPress={() => router.push('/workout-session')} style={styles.resumeButton} />
         </Card>
       )}
 
       {days.length === 0 ? (
-        <Card><Text style={styles.empty}>План пуст. Добавьте тренировочный день в редакторе.</Text></Card>
+        <Card><Text style={styles.empty}>{t('workouts.empty')}</Text></Card>
       ) : days.map((day, index) => {
         const expanded = expandedId === day.id;
         return (
@@ -44,8 +50,8 @@ export default function WorkoutsScreen() {
             <Card accent={expanded}>
               <View style={styles.dayHeader}>
                 <View style={styles.flex}>
-                  <Text style={styles.dayTitle}>День {index + 1} — {day.name}</Text>
-                  <Text style={[styles.dayMeta, expanded && styles.dayMetaActive]}>{expanded ? 'Выбранный день' : `${day.exercises.length} упражнений`}</Text>
+                  <Text style={styles.dayTitle}>{t('home.planTitle', { day: index + 1, name: resolveName(day, t) })}</Text>
+                  <Text style={[styles.dayMeta, expanded && styles.dayMetaActive]}>{expanded ? t('workouts.selectedDay') : t('common.exercises', { count: day.exercises.length })}</Text>
                 </View>
                 <Text style={[styles.chevron, expanded && styles.chevronActive]}>{expanded ? '⌄' : '›'}</Text>
               </View>
@@ -53,14 +59,14 @@ export default function WorkoutsScreen() {
                 <View style={styles.exerciseList}>
                   {day.exercises.map((exercise) => (
                     <View key={exercise.id} style={styles.exerciseRow}>
-                      <Text style={styles.exerciseName}>{exercise.name}</Text>
+                      <Text style={styles.exerciseName}>{resolveName(exercise, t)}</Text>
                       <Text style={styles.exerciseMeta}>
-                        {exercise.plannedSets} × {exercise.isTimeBased ? `${exercise.secondsPerSet ?? 60} с` : `${exercise.reps}${exercise.weight > 0 ? ` · ${exercise.weight} кг` : ''}`}
+                        {exercise.plannedSets} × {exercise.isTimeBased ? `${exercise.secondsPerSet ?? 60} ${t('common.seconds')}` : `${exercise.reps}${exercise.weight > 0 ? ` · ${exercise.weight} ${t('common.kg')}` : ''}`}
                       </Text>
                     </View>
                   ))}
                   <PrimaryButton
-                    label={`Начать день ${index + 1}`}
+                    label={t('workouts.startDay', { day: index + 1 })}
                     onPress={() => begin(day.id)}
                     disabled={Boolean(activeSession) || day.exercises.length === 0}
                     style={styles.startButton}
@@ -75,24 +81,24 @@ export default function WorkoutsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (c: Palette) => StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  editButton: { minHeight: 44, borderWidth: 1, borderColor: colors.accent, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center' },
-  editText: { color: colors.accent, fontFamily: fonts.bodyBold, fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
-  eyebrow: { color: colors.accent, fontFamily: fonts.bodyBold, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 },
-  activeTitle: { color: colors.textPrimary, fontFamily: fonts.headingSemiBold, fontSize: 23, textTransform: 'uppercase', marginTop: 5 },
+  editButton: { minHeight: 44, borderWidth: 1, borderColor: c.accentInk, borderRadius: 12, paddingHorizontal: 14, justifyContent: 'center' },
+  editText: { color: c.accentInk, fontFamily: fonts.bodyBold, fontSize: 12, textTransform: 'uppercase', letterSpacing: 0.5 },
+  eyebrow: { color: c.accentInk, fontFamily: fonts.bodyBold, fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 },
+  activeTitle: { color: c.textPrimary, fontFamily: fonts.headingSemiBold, fontSize: 23, textTransform: 'uppercase', marginTop: 5 },
   resumeButton: { marginTop: 14 },
   dayHeader: { flexDirection: 'row', alignItems: 'center' },
   flex: { flex: 1 },
-  dayTitle: { color: colors.textPrimary, fontFamily: fonts.bodyBold, fontSize: 16 },
-  dayMeta: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 13, marginTop: 3 },
-  dayMetaActive: { color: colors.accent, fontFamily: fonts.bodySemiBold },
-  chevron: { color: colors.textMuted, fontFamily: fonts.body, fontSize: 22, marginLeft: 12 },
-  chevronActive: { color: colors.accent },
-  exerciseList: { borderTopWidth: 1, borderTopColor: colors.border, marginTop: 14, paddingTop: 10, gap: 9 },
+  dayTitle: { color: c.textPrimary, fontFamily: fonts.bodyBold, fontSize: 16 },
+  dayMeta: { color: c.textSecondary, fontFamily: fonts.body, fontSize: 13, marginTop: 3 },
+  dayMetaActive: { color: c.accentInk, fontFamily: fonts.bodySemiBold },
+  chevron: { color: c.textMuted, fontFamily: fonts.body, fontSize: 22, marginLeft: 12 },
+  chevronActive: { color: c.accentInk },
+  exerciseList: { borderTopWidth: 1, borderTopColor: c.border, marginTop: 14, paddingTop: 10, gap: 9 },
   exerciseRow: { flexDirection: 'row', gap: 12, justifyContent: 'space-between', alignItems: 'baseline' },
-  exerciseName: { color: colors.textPrimary, fontFamily: fonts.body, fontSize: 14, flex: 1 },
-  exerciseMeta: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 13 },
+  exerciseName: { color: c.textPrimary, fontFamily: fonts.body, fontSize: 14, flex: 1 },
+  exerciseMeta: { color: c.textSecondary, fontFamily: fonts.body, fontSize: 13 },
   startButton: { marginTop: 6, minHeight: 48 },
-  empty: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 14, lineHeight: 21 },
+  empty: { color: c.textSecondary, fontFamily: fonts.body, fontSize: 14, lineHeight: 21 },
 });

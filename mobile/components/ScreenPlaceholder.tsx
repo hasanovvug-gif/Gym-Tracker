@@ -1,9 +1,14 @@
+import { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts, Palette } from '@/constants/theme';
+import { useTheme } from '@/hooks/useTheme';
 
 export function ScreenPlaceholder({ title, subtitle }: { title: string; subtitle?: string }) {
+  const c = useTheme();
+  const styles = useMemo(() => createStyles(c), [c]);
+
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.content}>
@@ -14,10 +19,10 @@ export function ScreenPlaceholder({ title, subtitle }: { title: string; subtitle
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (c: Palette) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: c.background,
   },
   content: {
     paddingHorizontal: 20,
@@ -27,13 +32,13 @@ const styles = StyleSheet.create({
     fontFamily: fonts.heading,
     fontSize: 30,
     textTransform: 'uppercase',
-    color: colors.textPrimary,
+    color: c.textPrimary,
     letterSpacing: 0.5,
   },
   subtitle: {
     fontFamily: fonts.body,
     fontSize: 14,
-    color: colors.textSecondary,
+    color: c.textSecondary,
     marginTop: 6,
   },
 });

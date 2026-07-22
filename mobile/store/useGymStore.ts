@@ -19,6 +19,7 @@ type NotificationKey = 'workout' | 'supplements' | 'sound';
 type Settings = {
   language: Language;
   theme: ThemeChoice;
+  onboardingSeen: boolean;
   notifications: Record<NotificationKey, boolean>;
 };
 
@@ -30,6 +31,7 @@ type GymState = {
   supplements: Supplement[];
   supplementLogs: SupplementLog[];
   settings: Settings;
+  hasHydrated: boolean;
   startWorkout: (dayId: string) => void;
   adjustWeight: (delta: number) => void;
   completeSet: () => void;
@@ -52,11 +54,12 @@ type GymState = {
   toggleSupplement: (supplementId: string, slot: SupplementSlot) => void;
   replenishSupplement: (supplementId: string, amount?: number) => void;
   toggleSupplementSlot: (supplementId: string, slot: SupplementSlot) => void;
-  updateSupplement: (supplementId: string, changes: Partial<Pick<Supplement, 'name' | 'dose'>>) => void;
+  updateSupplement: (supplementId: string, changes: Partial<Pick<Supplement, 'name' | 'dose' | 'stockUnit'>>) => void;
   addSupplement: () => void;
   removeSupplement: (supplementId: string) => void;
   setLanguage: (language: Language) => void;
   setTheme: (theme: ThemeChoice) => void;
+  setOnboardingSeen: (seen: boolean) => void;
   toggleNotification: (key: NotificationKey) => void;
   resetAll: () => void;
 };
@@ -91,6 +94,7 @@ function nextExerciseIndex(session: ActiveWorkoutSession, from: number) {
 const initialSettings: Settings = {
   language: 'RU',
   theme: 'dark',
+  onboardingSeen: false,
   notifications: { workout: true, supplements: true, sound: true },
 };
 
@@ -102,6 +106,7 @@ export const useGymStore = create<GymState>()((set, get) => ({
       supplements: clone(INITIAL_SUPPLEMENTS),
       supplementLogs: createInitialSupplementLogs(),
       settings: clone(initialSettings),
+      hasHydrated: false,
 
       startWorkout: (dayId) => {
         const day = get().workoutDays.find((item) => item.id === dayId);
@@ -112,6 +117,7 @@ export const useGymStore = create<GymState>()((set, get) => ({
             id: `session-${now}`,
             dayId: day.id,
             dayName: day.name,
+            dayNameKey: day.nameKey,
             startedAt: now,
             activeStartedAt: now,
             activeSeconds: 0,
@@ -125,6 +131,7 @@ export const useGymStore = create<GymState>()((set, get) => ({
             exercises: day.exercises.map((exercise) => ({
               exerciseId: exercise.id,
               exerciseName: exercise.name,
+              exerciseNameKey: exercise.nameKey,
               plannedSets: exercise.plannedSets,
               completedSets: 0,
               reps: exercise.reps,
@@ -298,6 +305,7 @@ export const useGymStore = create<GymState>()((set, get) => ({
           date: new Date(now).toISOString(),
           dayId: session.dayId,
           dayName: session.dayName,
+          dayNameKey: session.dayNameKey,
           activeSeconds,
           pausedSeconds,
           pauseCount: session.pauseCount,
@@ -323,7 +331,12 @@ export const useGymStore = create<GymState>()((set, get) => ({
       },
 
       updateDay: (dayId, changes) => set((state) => ({
-        workoutDays: state.workoutDays.map((day) => day.id === dayId ? { ...day, ...changes } : day),
+        workoutDays: state.workoutDays.map((day) => {
+          if (day.id !== dayId) return day;
+          const updated = { ...day, ...changes };
+          if ('name' in changes) delete updated.nameKey;
+          return updated;
+        }),
       })),
       addDay: () => set((state) => ({
         workoutDays: [
@@ -358,7 +371,16 @@ export const useGymStore = create<GymState>()((set, get) => ({
       })),
       updateExercise: (dayId, exerciseId, changes) => set((state) => ({
         workoutDays: state.workoutDays.map((day) => day.id === dayId
-          ? { ...day, exercises: day.exercises.map((exercise) => exercise.id === exerciseId ? { ...exercise, ...changes } : exercise) }
+          ? {
+              ...day,
+              exercises: day.exercises.map((exercise) => {
+                if (exercise.id !== exerciseId) return exercise;
+                const updated = { ...exercise, ...changes };
+                if ('name' in changes) delete updated.nameKey;
+                if ('muscleGroup' in changes) delete updated.muscleGroupKey;
+                return updated;
+              }),
+            }
           : day),
       })),
       removeExercise: (dayId, exerciseId) => set((state) => ({
@@ -414,7 +436,14 @@ export const useGymStore = create<GymState>()((set, get) => ({
         }),
       })),
       updateSupplement: (supplementId, changes) => set((state) => ({
-        supplements: state.supplements.map((supplement) => supplement.id === supplementId ? { ...supplement, ...changes } : supplement),
+        supplements: state.supplements.map((supplement) => {
+          if (supplement.id !== supplementId) return supplement;
+          const updated = { ...supplement, ...changes };
+          if ('name' in changes) delete updated.nameKey;
+          if ('dose' in changes) delete updated.doseKey;
+          if ('stockUnit' in changes) delete updated.stockUnitKey;
+          return updated;
+        }),
       })),
       addSupplement: () => set((state) => ({
         supplements: [
@@ -437,6 +466,7 @@ export const useGymStore = create<GymState>()((set, get) => ({
 
       setLanguage: (language) => set((state) => ({ settings: { ...state.settings, language } })),
       setTheme: (theme) => set((state) => ({ settings: { ...state.settings, theme } })),
+      setOnboardingSeen: (onboardingSeen) => set((state) => ({ settings: { ...state.settings, onboardingSeen } })),
       toggleNotification: (key) => set((state) => ({
         settings: {
           ...state.settings,
@@ -467,15 +497,79 @@ const selectPersistedState = (state: GymState): PersistedGymState => ({
   settings: state.settings,
 });
 
+// Состояние, сохранённое до появления i18n-ключей, их не содержит — без бэкфилла сидовые
+// названия остались бы русскими навсегда. Ключ проставляем только если текст не тронут руками.
+function backfillKey<T extends object, K extends keyof T & string, N extends keyof T & string>(
+  item: T,
+  seed: T | undefined,
+  textField: N,
+  keyField: K,
+) {
+  if (!seed || item[keyField] !== undefined || item[textField] !== seed[textField]) return item;
+  return { ...item, [keyField]: seed[keyField] } as T;
+}
+
+function backfillSeedKeys(saved: Partial<PersistedGymState>): Partial<PersistedGymState> {
+  const seedDays = new Map(INITIAL_WORKOUT_DAYS.map((day) => [day.id, day]));
+  const seedExercises = new Map(INITIAL_WORKOUT_DAYS.flatMap((day) => day.exercises).map((item) => [item.id, item]));
+  const seedSupplements = new Map(INITIAL_SUPPLEMENTS.map((item) => [item.id, item]));
+  const seedSessions = new Map(INITIAL_HISTORY.map((session) => [session.id, session]));
+
+  return {
+    ...saved,
+    workoutDays: saved.workoutDays?.map((day) => {
+      const withKey = backfillKey(day, seedDays.get(day.id), 'name', 'nameKey');
+      return {
+        ...withKey,
+        exercises: withKey.exercises.map((exercise) => {
+          const seed = seedExercises.get(exercise.id);
+          return backfillKey(
+            backfillKey(exercise, seed, 'name', 'nameKey'),
+            seed,
+            'muscleGroup',
+            'muscleGroupKey',
+          );
+        }),
+      };
+    }),
+    supplements: saved.supplements?.map((supplement) => {
+      const seed = seedSupplements.get(supplement.id);
+      return backfillKey(
+        backfillKey(backfillKey(supplement, seed, 'name', 'nameKey'), seed, 'dose', 'doseKey'),
+        seed,
+        'stockUnit',
+        'stockUnitKey',
+      );
+    }),
+    history: saved.history?.map((session) => {
+      const seed = seedSessions.get(session.id);
+      const withKey = backfillKey(session, seed, 'dayName', 'dayNameKey');
+      return {
+        ...withKey,
+        exercises: withKey.exercises.map((log) => {
+          const seedLog = seed?.exercises.find((item) => item.exerciseId === log.exerciseId);
+          return backfillKey(log, seedLog, 'exerciseName', 'exerciseNameKey');
+        }),
+      };
+    }),
+  };
+}
+
 void AsyncStorage.getItem(STORAGE_KEY)
   .then((raw) => {
     if (!raw) return;
     const parsed = JSON.parse(raw) as { data?: Partial<PersistedGymState> } | Partial<PersistedGymState>;
-    const saved: Partial<PersistedGymState> | undefined = (parsed as { data?: Partial<PersistedGymState> }).data
+    const savedRaw: Partial<PersistedGymState> | undefined = (parsed as { data?: Partial<PersistedGymState> }).data
       ?? (parsed as Partial<PersistedGymState>);
-    if (!saved) return;
+    if (!savedRaw) return;
+    const saved = backfillSeedKeys(savedRaw);
     useGymStore.setState({
       ...saved,
+      settings: {
+        ...initialSettings,
+        ...saved.settings,
+        notifications: { ...initialSettings.notifications, ...saved.settings?.notifications },
+      },
       supplements: saved.supplements?.map((supplement) => ({ ...supplement, unitsPerDose: supplement.unitsPerDose ?? 1 })),
       history: saved.history?.map((session) => ({ ...session, pauseRecords: session.pauseRecords ?? [] })),
     });
@@ -483,6 +577,7 @@ void AsyncStorage.getItem(STORAGE_KEY)
   .catch(() => undefined)
   .finally(() => {
     storageHydrated = true;
+    useGymStore.setState({ hasHydrated: true });
   });
 
 useGymStore.subscribe((state) => {

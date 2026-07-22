@@ -1,29 +1,35 @@
 import { Tabs } from 'expo-router';
-import { Text, View } from 'react-native';
+import { useMemo } from 'react';
+import { Platform, StyleSheet, Text, View } from 'react-native';
 
-import { colors, fonts } from '@/constants/theme';
+import { fonts, Palette } from '@/constants/theme';
+import { useTheme } from '@/hooks/useTheme';
+import { useT } from '@/i18n';
 
 function TabDot({ focused }: { focused: boolean }) {
+  const c = useTheme();
+  const styles = useMemo(() => createStyles(c), [c]);
   return (
-    <View
-      style={{
-        width: 5,
-        height: 5,
-        borderRadius: 2.5,
-        backgroundColor: focused ? colors.accent : 'transparent',
-        marginBottom: 5,
-      }}
-    />
+    <View style={[styles.tabDot, focused && styles.tabDotFocused]} />
   );
 }
 
 function TabLabel({ focused, color, label }: { focused: boolean; color: string; label: string }) {
   return (
     <Text
+      numberOfLines={1}
+      adjustsFontSizeToFit={Platform.OS !== 'web'}
+      minimumFontScale={0.8}
+      allowFontScaling={false}
       style={{
         fontFamily: focused ? fonts.bodyBold : fonts.bodySemiBold,
         fontSize: 10,
+        lineHeight: 12,
+        height: 12,
         color,
+        width: 72,
+        flexShrink: 0,
+        textAlign: 'center',
       }}>
       {label}
     </Text>
@@ -31,64 +37,74 @@ function TabLabel({ focused, color, label }: { focused: boolean; color: string; 
 }
 
 export default function TabLayout() {
+  const c = useTheme();
+  const styles = useMemo(() => createStyles(c), [c]);
+  const { t } = useT();
+
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarActiveTintColor: c.accentInk,
+        tabBarInactiveTintColor: c.textMuted,
         tabBarShowLabel: true,
-        tabBarStyle: {
-          backgroundColor: colors.background,
-          borderTopColor: '#1C1F24',
-          borderTopWidth: 1,
-          height: 78,
-          paddingTop: 10,
-          paddingBottom: 28,
-        },
-        tabBarItemStyle: { flexDirection: 'column' },
+        tabBarStyle: styles.tabBar,
+        tabBarItemStyle: { flexDirection: 'column', paddingHorizontal: 0, paddingVertical: 0, minWidth: 0 },
         tabBarIconStyle: { marginBottom: 0 },
       }}>
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Главная',
+          title: t('tabs.home'),
           tabBarIcon: ({ focused }) => <TabDot focused={focused} />,
-          tabBarLabel: ({ focused, color }) => <TabLabel focused={focused} color={color} label="Главная" />,
+          tabBarLabel: ({ focused, color }) => <TabLabel focused={focused} color={color} label={t('tabs.home')} />,
         }}
       />
       <Tabs.Screen
         name="workouts"
         options={{
-          title: 'Тренировки',
+          title: t('tabs.workouts'),
           tabBarIcon: ({ focused }) => <TabDot focused={focused} />,
-          tabBarLabel: ({ focused, color }) => <TabLabel focused={focused} color={color} label="Тренировки" />,
+          tabBarLabel: ({ focused, color }) => <TabLabel focused={focused} color={color} label={t('tabs.workouts')} />,
         }}
       />
       <Tabs.Screen
         name="supplements"
         options={{
-          title: 'Добавки',
+          title: t('tabs.supplements'),
           tabBarIcon: ({ focused }) => <TabDot focused={focused} />,
-          tabBarLabel: ({ focused, color }) => <TabLabel focused={focused} color={color} label="Добавки" />,
+          tabBarLabel: ({ focused, color }) => <TabLabel focused={focused} color={color} label={t('tabs.supplements')} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
-          title: 'История',
+          title: t('tabs.history'),
           tabBarIcon: ({ focused }) => <TabDot focused={focused} />,
-          tabBarLabel: ({ focused, color }) => <TabLabel focused={focused} color={color} label="История" />,
+          tabBarLabel: ({ focused, color }) => <TabLabel focused={focused} color={color} label={t('tabs.history')} />,
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Настройки',
+          title: t('tabs.settings'),
           tabBarIcon: ({ focused }) => <TabDot focused={focused} />,
-          tabBarLabel: ({ focused, color }) => <TabLabel focused={focused} color={color} label="Настройки" />,
+          tabBarLabel: ({ focused, color }) => <TabLabel focused={focused} color={color} label={t('tabs.settings')} />,
         }}
       />
     </Tabs>
   );
 }
+
+const createStyles = (c: Palette) => StyleSheet.create({
+  tabDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: 'transparent', marginBottom: 5 },
+  tabDotFocused: { backgroundColor: c.accentInk },
+  tabBar: {
+    backgroundColor: c.background,
+    borderTopColor: c.divider,
+    borderTopWidth: 1,
+    height: 78,
+    paddingTop: 10,
+    paddingBottom: 28,
+  },
+});

@@ -2,31 +2,48 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { Card, Heading, OutlineButton, ProgressBar, Screen, Segmented } from '@/components/ui';
-import { colors, fonts } from '@/constants/theme';
+import { fonts, Palette } from '@/constants/theme';
 import { dateKey } from '@/data/supplementData';
+import { useTheme } from '@/hooks/useTheme';
+import { type TranslationKey, useT } from '@/i18n';
+import { resolveDose, resolveName, resolveStockUnit } from '@/i18n/displayName';
 import { useGymStore } from '@/store/useGymStore';
-import { SUPPLEMENT_SLOTS } from '@/types/supplement';
-import { adherenceForMonth, calculateSupplementStreak, isDayComplete, SLOT_LABELS } from '@/utils/supplements';
+import { SUPPLEMENT_SLOTS, type SupplementSlot } from '@/types/supplement';
+import { formatNumber } from '@/utils/format';
+import { adherenceForMonth, calculateSupplementStreak, isDayComplete } from '@/utils/supplements';
 
 type SupplementTab = 'today' | 'stock' | 'progress' | 'schedule';
 
-const tabs: { label: string; value: SupplementTab }[] = [
-  { label: 'Сегодня', value: 'today' },
-  { label: 'Склад', value: 'stock' },
-  { label: 'Прогресс', value: 'progress' },
-  { label: 'Расписание', value: 'schedule' },
-];
+const supplementSlotKeys = {
+  morning: 'supplements.morning',
+  pre_workout: 'supplements.preWorkout',
+  evening: 'supplements.evening',
+} satisfies Record<SupplementSlot, TranslationKey>;
+
+function useThemedStyles() {
+  const c = useTheme();
+  const styles = useMemo(() => createStyles(c), [c]);
+  return { c, styles };
+}
 
 export default function SupplementsScreen() {
+  const { styles } = useThemedStyles();
+  const { t } = useT();
   const [tab, setTab] = useState<SupplementTab>('today');
   const store = useGymStore();
   const streak = calculateSupplementStreak(store.supplements, store.supplementLogs);
+  const tabs: { label: string; value: SupplementTab }[] = [
+    { label: t('supplements.today'), value: 'today' },
+    { label: t('supplements.stock'), value: 'stock' },
+    { label: t('supplements.progress'), value: 'progress' },
+    { label: t('supplements.schedule'), value: 'schedule' },
+  ];
 
   return (
     <Screen>
       <View style={styles.header}>
-        <Heading>Добавки</Heading>
-        {tab === 'today' && <View style={styles.streakBadge}><Text style={styles.streakBadgeText}>{streak} дн подряд</Text></View>}
+        <Heading>{t('supplements.title')}</Heading>
+        {tab === 'today' && <View style={styles.streakBadge}><Text style={styles.streakBadgeText}>{t('supplements.streak', { count: streak })}</Text></View>}
       </View>
       <Segmented options={tabs} value={tab} onChange={setTab} />
       {tab === 'today' && <TodayTab />}
@@ -38,6 +55,8 @@ export default function SupplementsScreen() {
 }
 
 function TodayTab() {
+  const { styles } = useThemedStyles();
+  const { t } = useT();
   const supplements = useGymStore((state) => state.supplements);
   const logs = useGymStore((state) => state.supplementLogs);
   const toggleSupplement = useGymStore((state) => state.toggleSupplement);
@@ -51,7 +70,7 @@ function TodayTab() {
         if (items.length === 0) return null;
         return (
           <View key={slot} style={styles.slotSection}>
-            <Text style={styles.slotLabel}>{SLOT_LABELS[slot]} · {taken}/{items.length}</Text>
+            <Text style={styles.slotLabel}>{t(supplementSlotKeys[slot])} · {taken}/{items.length}</Text>
             <View style={styles.itemStack}>
               {items.map((supplement) => {
                 const checked = Boolean(todayLog?.taken[`${supplement.id}:${slot}`]);
@@ -59,8 +78,8 @@ function TodayTab() {
                   <Pressable key={supplement.id} onPress={() => toggleSupplement(supplement.id, slot)}>
                     <Card accent={!checked && slot === 'pre_workout'} style={[styles.checkCard, checked && styles.checkedCard]}>
                       <View style={[styles.checkbox, checked && styles.checkboxDone]}>{checked && <Text style={styles.checkmark}>✓</Text>}</View>
-                      <Text style={styles.checkName}>{supplement.name}</Text>
-                      <Text style={styles.checkDose}>{supplement.dose}</Text>
+                      <Text style={styles.checkName}>{resolveName(supplement, t)}</Text>
+                      <Text style={styles.checkDose}>{resolveDose(supplement, t)}</Text>
                     </Card>
                   </Pressable>
                 );
@@ -74,6 +93,8 @@ function TodayTab() {
 }
 
 function StockTab() {
+  const { c, styles } = useThemedStyles();
+  const { t, language } = useT();
   const supplements = useGymStore((state) => state.supplements);
   const replenish = useGymStore((state) => state.replenishSupplement);
   const low = supplements.filter((supplement) => {
@@ -86,7 +107,7 @@ function StockTab() {
       {low.length > 0 && (
         <View style={styles.warningBanner}>
           <View style={styles.warningDot} />
-          <Text style={styles.warningText}>{low.length} добавки заканчиваются — пора докупить</Text>
+          <Text style={styles.warningText}>{t('supplements.lowStock', { count: low.length })}</Text>
         </View>
       )}
       <View style={styles.itemStack}>
@@ -95,27 +116,29 @@ function StockTab() {
           const daily = supplement.unitsPerDose * Math.max(1, supplement.schedule.length);
           const days = Math.floor(supplement.stock / daily);
           const isLow = days <= 7;
-          const estimate = days >= 60 ? `~${Math.round(days / 30)} мес` : `~${days} дн`;
+          const estimate = days >= 60 ? t('supplements.months', { count: formatNumber(Math.round(days / 30), language) }) : t('supplements.days', { count: formatNumber(days, language) });
           return (
             <Card key={supplement.id} warning={isLow} style={styles.stockCard}>
               <View style={styles.stockHeader}>
-                <Text style={styles.stockName}>{supplement.name}</Text>
+                <Text style={styles.stockName}>{resolveName(supplement, t)}</Text>
                 <View style={styles.stockRight}>
-                  <Text style={[styles.stockMeta, isLow && styles.warningColor]}>{supplement.stock} {supplement.stockUnit} · {estimate}</Text>
+                  <Text style={[styles.stockMeta, isLow && styles.warningColor]}>{formatNumber(supplement.stock, language)} {resolveStockUnit(supplement, t)} · {estimate}</Text>
                   <Pressable onPress={() => replenish(supplement.id, 30)} style={styles.replenishButton}><Text style={styles.replenishText}>+30</Text></Pressable>
                 </View>
               </View>
-              <ProgressBar progress={ratio} color={isLow ? colors.warning : colors.accent} />
+              <ProgressBar progress={ratio} color={isLow ? c.warning : c.accent} />
             </Card>
           );
         })}
       </View>
-      <Text style={styles.stockHint}>Нажмите +30 у нужной добавки, чтобы пополнить остаток.</Text>
+      <Text style={styles.stockHint}>{t('supplements.stockHint')}</Text>
     </View>
   );
 }
 
 function ProgressTab() {
+  const { c, styles } = useThemedStyles();
+  const { t, language } = useT();
   const supplements = useGymStore((state) => state.supplements);
   const logs = useGymStore((state) => state.supplementLogs);
   const streak = calculateSupplementStreak(supplements, logs);
@@ -125,7 +148,7 @@ function ProgressTab() {
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstWeekday = (new Date(year, month, 1).getDay() + 6) % 7;
   const adherence = adherenceForMonth(supplements, logs, year, month);
-  const monthName = new Intl.DateTimeFormat('ru-RU', { month: 'long' }).format(now);
+  const monthName = new Intl.DateTimeFormat({ RU: 'ru-RU', UA: 'uk-UA', EN: 'en-GB' }[language], { month: 'long' }).format(now);
   const cells = useMemo(() => [
     ...Array.from({ length: firstWeekday }, () => null),
     ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
@@ -135,16 +158,16 @@ function ProgressTab() {
     <View style={styles.tabContent}>
       <Card accent style={styles.streakCard}>
         <Text style={styles.bigStreak}>{streak}</Text>
-        <Text style={styles.streakTitle}>дней подряд</Text>
-        <Text style={styles.streakMeta}>Рекорд — {Math.max(23, streak)} дня · до рекорда {Math.max(0, 23 - streak)}</Text>
+        <Text style={styles.streakTitle}>{t('supplements.daysInRow')}</Text>
+        <Text style={styles.streakMeta}>{t('supplements.record', { record: Math.max(23, streak), remaining: Math.max(0, 23 - streak) })}</Text>
       </Card>
       <Card style={styles.calendarCard}>
         <View style={styles.calendarHeader}>
           <Text style={styles.month}>{monthName}</Text>
-          <Text style={styles.adherence}>{adherence}% приёма</Text>
+          <Text style={styles.adherence}>{t('supplements.adherence', { value: formatNumber(adherence, language) })}</Text>
         </View>
         <View style={styles.calendarGrid}>
-          {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((label) => <View key={label} style={styles.calendarCell}><Text style={styles.weekday}>{label}</Text></View>)}
+          {t('supplements.weekdays').split('|').map((label) => <View key={label} style={styles.calendarCell}><Text style={styles.weekday}>{label}</Text></View>)}
           {cells.map((day, index) => {
             if (!day) return <View key={`blank-${index}`} style={styles.calendarCell} />;
             const date = new Date(year, month, day);
@@ -164,9 +187,9 @@ function ProgressTab() {
           })}
         </View>
         <View style={styles.legend}>
-          <Legend color={colors.accent} label="всё принято" />
-          <Legend color="#37401A" label="частично" />
-          <Legend color="#1C1F24" label="впереди" />
+          <Legend color={c.accent} label={t('supplements.complete')} />
+          <Legend color={c.accentSurfaceStrong} label={t('supplements.partial')} />
+          <Legend color={c.trackBg} label={t('supplements.ahead')} />
         </View>
       </Card>
     </View>
@@ -174,6 +197,8 @@ function ProgressTab() {
 }
 
 function ScheduleTab() {
+  const { styles } = useThemedStyles();
+  const { t } = useT();
   const supplements = useGymStore((state) => state.supplements);
   const { toggleSupplementSlot, updateSupplement, addSupplement, removeSupplement } = useGymStore();
   return (
@@ -182,15 +207,15 @@ function ScheduleTab() {
         <Card key={supplement.id} style={styles.scheduleCard}>
           <View style={styles.scheduleHeader}>
             <View style={styles.scheduleInputs}>
-              <TextInput accessibilityLabel="Название добавки" value={supplement.name} onChangeText={(name) => updateSupplement(supplement.id, { name })} style={styles.supplementNameInput} />
-              <TextInput accessibilityLabel="Доза добавки" value={supplement.dose} onChangeText={(dose) => updateSupplement(supplement.id, { dose })} style={styles.doseInput} />
+              <TextInput accessibilityLabel={t('supplements.nameLabel')} value={resolveName(supplement, t)} onChangeText={(name) => updateSupplement(supplement.id, { name })} style={styles.supplementNameInput} />
+              <TextInput accessibilityLabel={t('supplements.doseLabel')} value={resolveDose(supplement, t)} onChangeText={(dose) => updateSupplement(supplement.id, { dose })} style={styles.doseInput} />
             </View>
             <Pressable onPress={() => removeSupplement(supplement.id)} style={styles.removeButton}><Text style={styles.removeText}>−</Text></Pressable>
           </View>
           <View style={styles.scheduleSlots}>
             {SUPPLEMENT_SLOTS.map((slot) => {
               const selected = supplement.schedule.includes(slot);
-              const label = slot === 'pre_workout' ? 'Перед трен.' : SLOT_LABELS[slot];
+              const label = t(supplementSlotKeys[slot]);
               return (
                 <Pressable key={slot} onPress={() => toggleSupplementSlot(supplement.id, slot)} style={[styles.slotChip, selected && styles.slotChipSelected]}>
                   <Text style={[styles.slotChipText, selected && styles.slotChipTextSelected]}>{label}</Text>
@@ -200,75 +225,76 @@ function ScheduleTab() {
           </View>
         </Card>
       ))}
-      <OutlineButton label="+ Добавка" onPress={addSupplement} style={styles.addButton} />
+      <OutlineButton label={t('supplements.add')} onPress={addSupplement} style={styles.addButton} />
     </View>
   );
 }
 
 function Legend({ color, label }: { color: string; label: string }) {
+  const { styles } = useThemedStyles();
   return <View style={styles.legendItem}><View style={[styles.legendDot, { backgroundColor: color }]} /><Text style={styles.legendText}>{label}</Text></View>;
 }
 
-const styles = StyleSheet.create({
+const createStyles = (c: Palette) => StyleSheet.create({
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  streakBadge: { borderWidth: 1, borderColor: colors.accent, backgroundColor: '#151A0E', borderRadius: 14, paddingHorizontal: 11, paddingVertical: 7 },
-  streakBadgeText: { color: colors.accent, fontFamily: fonts.bodyExtraBold, fontSize: 12 },
+  streakBadge: { borderWidth: 1, borderColor: c.accentInk, backgroundColor: c.accentSurface, borderRadius: 14, paddingHorizontal: 11, paddingVertical: 7 },
+  streakBadgeText: { color: c.accentInk, fontFamily: fonts.bodyExtraBold, fontSize: 12 },
   tabContent: { gap: 14 },
   slotSection: { gap: 7 },
-  slotLabel: { color: colors.textMuted, fontFamily: fonts.bodyExtraBold, fontSize: 10, textTransform: 'uppercase', letterSpacing: 1.4 },
+  slotLabel: { color: c.textMuted, fontFamily: fonts.bodyExtraBold, fontSize: 10, textTransform: 'uppercase', letterSpacing: 1.4 },
   itemStack: { gap: 8 },
   checkCard: { minHeight: 58, flexDirection: 'row', alignItems: 'center', gap: 13, paddingVertical: 12 },
-  checkedCard: { opacity: 0.6, borderColor: colors.border },
-  checkbox: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: colors.borderDashed, alignItems: 'center', justifyContent: 'center' },
-  checkboxDone: { backgroundColor: colors.accent, borderColor: colors.accent },
-  checkmark: { color: colors.accentText, fontFamily: fonts.bodyExtraBold, fontSize: 14 },
-  checkName: { flex: 1, color: colors.textPrimary, fontFamily: fonts.bodyBold, fontSize: 15 },
-  checkDose: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 13 },
-  warningBanner: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: colors.warningBg, borderWidth: 1, borderColor: colors.warning, borderRadius: 16, paddingHorizontal: 15 },
-  warningDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: colors.warning },
-  warningText: { flex: 1, color: colors.warning, fontFamily: fonts.bodyBold, fontSize: 12 },
+  checkedCard: { opacity: 0.6, borderColor: c.border },
+  checkbox: { width: 28, height: 28, borderRadius: 14, borderWidth: 2, borderColor: c.borderDashed, alignItems: 'center', justifyContent: 'center' },
+  checkboxDone: { backgroundColor: c.accent, borderColor: c.accent },
+  checkmark: { color: c.accentText, fontFamily: fonts.bodyExtraBold, fontSize: 14 },
+  checkName: { flex: 1, color: c.textPrimary, fontFamily: fonts.bodyBold, fontSize: 15 },
+  checkDose: { color: c.textSecondary, fontFamily: fonts.body, fontSize: 13 },
+  warningBanner: { minHeight: 52, flexDirection: 'row', alignItems: 'center', gap: 10, backgroundColor: c.warningBg, borderWidth: 1, borderColor: c.warning, borderRadius: 16, paddingHorizontal: 15 },
+  warningDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: c.warning },
+  warningText: { flex: 1, color: c.warning, fontFamily: fonts.bodyBold, fontSize: 12 },
   stockCard: { gap: 10, paddingVertical: 13 },
   stockHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 8 },
-  stockName: { flex: 1, color: colors.textPrimary, fontFamily: fonts.bodyBold, fontSize: 15 },
+  stockName: { flex: 1, color: c.textPrimary, fontFamily: fonts.bodyBold, fontSize: 15 },
   stockRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-  stockMeta: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 11 },
-  warningColor: { color: colors.warning, fontFamily: fonts.bodyBold },
-  replenishButton: { minWidth: 44, minHeight: 40, borderRadius: 12, borderWidth: 1, borderColor: colors.borderDashed, alignItems: 'center', justifyContent: 'center' },
-  replenishText: { color: colors.accent, fontFamily: fonts.bodyBold, fontSize: 12 },
-  stockHint: { color: colors.textDim, fontFamily: fonts.body, fontSize: 11, textAlign: 'center' },
-  streakCard: { alignItems: 'center', borderRadius: 22, backgroundColor: '#151A0E', paddingVertical: 20 },
-  bigStreak: { color: colors.accent, fontFamily: fonts.heading, fontSize: 62, lineHeight: 66 },
-  streakTitle: { color: colors.textPrimary, fontFamily: fonts.bodyExtraBold, fontSize: 12, textTransform: 'uppercase', letterSpacing: 2 },
-  streakMeta: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 12, marginTop: 5 },
+  stockMeta: { color: c.textSecondary, fontFamily: fonts.body, fontSize: 11 },
+  warningColor: { color: c.warning, fontFamily: fonts.bodyBold },
+  replenishButton: { minWidth: 44, minHeight: 40, borderRadius: 12, borderWidth: 1, borderColor: c.borderDashed, alignItems: 'center', justifyContent: 'center' },
+  replenishText: { color: c.accentInk, fontFamily: fonts.bodyBold, fontSize: 12 },
+  stockHint: { color: c.textDim, fontFamily: fonts.body, fontSize: 11, textAlign: 'center' },
+  streakCard: { alignItems: 'center', borderRadius: 22, backgroundColor: c.accentSurface, paddingVertical: 20 },
+  bigStreak: { color: c.accentInk, fontFamily: fonts.heading, fontSize: 62, lineHeight: 66 },
+  streakTitle: { color: c.textPrimary, fontFamily: fonts.bodyExtraBold, fontSize: 12, textTransform: 'uppercase', letterSpacing: 2 },
+  streakMeta: { color: c.textSecondary, fontFamily: fonts.body, fontSize: 12, marginTop: 5 },
   calendarCard: { padding: 16 },
   calendarHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
-  month: { color: colors.textSecondary, fontFamily: fonts.bodyBold, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
-  adherence: { color: colors.accent, fontFamily: fonts.bodyExtraBold, fontSize: 12 },
+  month: { color: c.textSecondary, fontFamily: fonts.bodyBold, fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 },
+  adherence: { color: c.accentInk, fontFamily: fonts.bodyExtraBold, fontSize: 12 },
   calendarGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 13 },
   calendarCell: { width: '14.285%', height: 36, alignItems: 'center', justifyContent: 'center' },
-  weekday: { color: colors.textDim, fontFamily: fonts.bodyBold, fontSize: 9 },
-  calendarDay: { width: 28, height: 28, borderRadius: 8, backgroundColor: colors.surfaceInset, alignItems: 'center', justifyContent: 'center' },
-  calendarComplete: { backgroundColor: colors.accent },
-  calendarPartial: { backgroundColor: '#37401A' },
-  calendarFuture: { backgroundColor: '#1C1F24' },
-  calendarToday: { borderWidth: 2, borderColor: colors.textPrimary },
-  calendarDayText: { color: colors.textSecondary, fontFamily: fonts.bodySemiBold, fontSize: 9 },
-  calendarDayTextComplete: { color: colors.accentText, fontFamily: fonts.bodyBold },
+  weekday: { color: c.textDim, fontFamily: fonts.bodyBold, fontSize: 9 },
+  calendarDay: { width: 28, height: 28, borderRadius: 8, backgroundColor: c.surfaceInset, alignItems: 'center', justifyContent: 'center' },
+  calendarComplete: { backgroundColor: c.accent },
+  calendarPartial: { backgroundColor: c.accentSurfaceStrong },
+  calendarFuture: { backgroundColor: c.trackBg },
+  calendarToday: { borderWidth: 2, borderColor: c.textPrimary },
+  calendarDayText: { color: c.textSecondary, fontFamily: fonts.bodySemiBold, fontSize: 9 },
+  calendarDayTextComplete: { color: c.accentText, fontFamily: fonts.bodyBold },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginTop: 12 },
   legendItem: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   legendDot: { width: 10, height: 10, borderRadius: 3 },
-  legendText: { color: colors.textSecondary, fontFamily: fonts.body, fontSize: 10 },
+  legendText: { color: c.textSecondary, fontFamily: fonts.body, fontSize: 10 },
   scheduleCard: { gap: 10, paddingVertical: 13 },
   scheduleHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   scheduleInputs: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6 },
-  supplementNameInput: { flex: 1, minHeight: 40, color: colors.textPrimary, fontFamily: fonts.bodyBold, fontSize: 14, borderBottomWidth: 1, borderBottomColor: colors.border },
-  doseInput: { width: 78, minHeight: 40, color: colors.textSecondary, fontFamily: fonts.body, fontSize: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
+  supplementNameInput: { flex: 1, minHeight: 40, color: c.textPrimary, fontFamily: fonts.bodyBold, fontSize: 14, borderBottomWidth: 1, borderBottomColor: c.border },
+  doseInput: { width: 78, minHeight: 40, color: c.textSecondary, fontFamily: fonts.body, fontSize: 12, borderBottomWidth: 1, borderBottomColor: c.border },
   removeButton: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
-  removeText: { color: colors.danger, fontFamily: fonts.bodyBold, fontSize: 18 },
+  removeText: { color: c.danger, fontFamily: fonts.bodyBold, fontSize: 18 },
   scheduleSlots: { flexDirection: 'row', flexWrap: 'wrap', gap: 7 },
-  slotChip: { minHeight: 38, borderRadius: 19, borderWidth: 1, borderColor: colors.borderDashed, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
-  slotChipSelected: { backgroundColor: colors.accent, borderColor: colors.accent },
-  slotChipText: { color: colors.textSecondary, fontFamily: fonts.bodySemiBold, fontSize: 11 },
-  slotChipTextSelected: { color: colors.accentText, fontFamily: fonts.bodyExtraBold },
+  slotChip: { minHeight: 38, borderRadius: 19, borderWidth: 1, borderColor: c.borderDashed, paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center' },
+  slotChipSelected: { backgroundColor: c.accent, borderColor: c.accent },
+  slotChipText: { color: c.textSecondary, fontFamily: fonts.bodySemiBold, fontSize: 11 },
+  slotChipTextSelected: { color: c.accentText, fontFamily: fonts.bodyExtraBold },
   addButton: { borderStyle: 'dashed' },
 });

@@ -7,7 +7,9 @@ export type WorkoutPhase = 'active' | 'rest' | 'paused';
 export type Exercise = {
   id: string;
   name: string;
+  nameKey?: string;
   muscleGroup: string;
+  muscleGroupKey?: string;
   plannedSets: number;
   reps: number;
   weight: number;
@@ -19,12 +21,14 @@ export type WorkoutDay = {
   id: string;
   order: number;
   name: string;
+  nameKey?: string;
   exercises: Exercise[];
 };
 
 export type ExerciseLog = {
   exerciseId: string;
   exerciseName: string;
+  exerciseNameKey?: string;
   plannedSets: number;
   completedSets: number;
   reps: number;
@@ -46,6 +50,7 @@ export type WorkoutSession = {
   date: string;
   dayId: string;
   dayName: string;
+  dayNameKey?: string;
   activeSeconds: number;
   pausedSeconds: number;
   pauseCount: number;
@@ -58,6 +63,7 @@ export type ActiveWorkoutSession = {
   id: string;
   dayId: string;
   dayName: string;
+  dayNameKey?: string;
   startedAt: number;
   activeStartedAt: number;
   activeSeconds: number;
