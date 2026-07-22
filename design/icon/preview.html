@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gym Tracker — иконка приложения</title>
+<style>
+  :root { --bg:#0B0C0E; --lime:#C8F031; --card:#15171B; --txt:#E8EAE4; --dim:#8A8F87; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--txt); font:16px/1.5 -apple-system, "Manrope", system-ui, sans-serif; padding:48px 32px 80px; }
+  .wrap { max-width:1080px; margin:0 auto; }
+  h1 { font-family:"Oswald","Arial Narrow",sans-serif; font-weight:700; text-transform:uppercase; letter-spacing:.02em; font-size:34px; }
+  h1 span { color:var(--lime); }
+  h2 { font-family:"Oswald","Arial Narrow",sans-serif; font-weight:700; text-transform:uppercase; font-size:20px; margin:56px 0 20px; color:var(--lime); }
+  .sub { color:var(--dim); margin-top:6px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:24px; }
+  .card { background:var(--card); border-radius:18px; padding:28px; }
+  .card.pick { outline:2px solid var(--lime); }
+  .tag { display:inline-block; font-family:"Oswald","Arial Narrow",sans-serif; text-transform:uppercase; font-size:12px; letter-spacing:.08em; background:var(--lime); color:var(--bg); border-radius:6px; padding:3px 10px; margin-bottom:16px; }
+  .icons { display:flex; align-items:flex-end; gap:20px; margin:8px 0 20px; }
+  .sq { border-radius:22.5%; overflow:hidden; flex:none; }
+  .sq svg { display:block; width:100%; height:100%; }
+  .s180 { width:180px; height:180px; } .s120 { width:120px; height:120px; }
+  .s60 { width:60px; height:60px; } .s60.sq { border-radius:22.5%; }
+  .name { font-family:"Oswald","Arial Narrow",sans-serif; font-weight:700; text-transform:uppercase; font-size:17px; margin-bottom:4px; }
+  .why { font-size:14px; margin-top:10px; } .why b { color:var(--lime); font-weight:600; }
+  .risk b { color:#E07A5F; font-weight:600; }
+  .final-row { display:flex; flex-wrap:wrap; align-items:flex-end; gap:32px; }
+  .lbl { font-size:12px; color:var(--dim); text-align:center; margin-top:10px; }
+  .circle { border-radius:50%; overflow:hidden; width:150px; height:150px; position:relative; flex:none; }
+  .circle svg { position:absolute; inset:0; width:100%; height:100%; }
+  .files { font:13px/1.9 ui-monospace,monospace; color:var(--dim); background:var(--card); border-radius:14px; padding:20px 24px; }
+  .files b { color:var(--txt); font-weight:600; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <g id="markG">
+      <path fill-rule="nonzero" d="M512 152 A270 270 0 0 1 772.8 352 L609.5 352 A120 120 0 0 0 512 302 A120 120 0 0 0 392 422 L392 602 A120 120 0 0 0 512 722 A120 120 0 0 0 632 602 L632 452 L782 452 L782 602 A270 270 0 0 1 512 872 A270 270 0 0 1 242 602 L242 422 A270 270 0 0 1 512 152 Z M512 452 L782 452 L782 602 L512 602 Z"/>
+    </g>
+    <g id="markRing">
+      <path d="M512 182 A330 330 0 1 1 182 512 L332 512 A180 180 0 1 0 512 332 Z"/>
+      <rect x="427" y="427" width="170" height="170" rx="36"/>
+    </g>
+    <g id="markBars">
+      <rect x="202" y="197" width="620" height="150" rx="45"/>
+      <rect x="202" y="437" width="380" height="150" rx="45"/>
+      <rect x="202" y="677" width="150" height="150" rx="45"/>
+    </g>
+  </defs>
+</svg>
+
+<div class="wrap">
+  <h1>Gym Tracker — <span>иконка</span></h1>
+  <p class="sub">Два цвета: лайм #C8F031 на почти-чёрном #0B0C0E. Ноль градиентов, ноль текста-шрифтом.</p>
+
+  <h2>Три варианта</h2>
+  <div class="grid">
+    <div class="card pick">
+      <span class="tag">Рекомендую</span>
+      <div class="name">1 · G-кольцо</div>
+      <div class="icons">
+        <div class="sq s180"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0C0E"/><use href="#markG" fill="#C8F031"/></svg></div>
+        <div class="sq s60"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0C0E"/><use href="#markG" fill="#C8F031"/></svg></div>
+      </div>
+      <p class="why"><b>Почему работает:</b> узкая G с плоскими срезами в духе Oswald — это одновременно и монограмма, и кольцо таймера отдыха с разрывом: два смысла в одной форме.</p>
+      <p class="why risk"><b>Риск:</b> одиночная литера — приём частый, узнаваемость держится только на характере формы.</p>
+    </div>
+    <div class="card">
+      <div class="name">2 · Кольцо отдыха</div>
+      <div class="icons">
+        <div class="sq s180"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0C0E"/><use href="#markRing" fill="#C8F031"/></svg></div>
+        <div class="sq s60"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0C0E"/><use href="#markRing" fill="#C8F031"/></svg></div>
+      </div>
+      <p class="why"><b>Почему работает:</b> кольцо на ¾ + квадрат «стоп» — буквально момент отдыха с экрана тренировки, самый честный символ приложения.</p>
+      <p class="why risk"><b>Риск:</b> кольца — самый заезженный жанр фитнес-иконок (Apple Fitness), на 60px читается хуже остальных.</p>
+    </div>
+    <div class="card">
+      <div class="name">3 · Полосы подходов</div>
+      <div class="icons">
+        <div class="sq s180"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0C0E"/><use href="#markBars" fill="#C8F031"/></svg></div>
+        <div class="sq s60"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0C0E"/><use href="#markBars" fill="#C8F031"/></svg></div>
+      </div>
+      <p class="why"><b>Почему работает:</b> сделано / текущий / впереди — механика подходов одним взглядом, максимально плотно и инструментально.</p>
+      <p class="why risk"><b>Риск:</b> издалека может прочитаться как буква «F» или «загрузка», связь с тренировками не мгновенная.</p>
+    </div>
+  </div>
+
+  <h2>Финал: G-кольцо во всех ролях</h2>
+  <div class="card">
+    <div class="final-row">
+      <div>
+        <div class="sq s180"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0C0E"/><use href="#markG" fill="#C8F031"/></svg></div>
+        <div class="lbl">iOS · основная</div>
+      </div>
+      <div>
+        <div class="sq s180"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#C8F031"/><use href="#markG" fill="#0B0C0E"/></svg></div>
+        <div class="lbl">Инверсия (alt / светлая)</div>
+      </div>
+      <div>
+        <div class="circle"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0C0E"/><g transform="translate(512 512) scale(0.82) translate(-512 -512)"><use href="#markG" fill="#C8F031"/></g></svg></div>
+        <div class="lbl">Android adaptive · круг</div>
+      </div>
+      <div>
+        <div class="icons" style="margin:0">
+          <div class="sq s120"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0C0E"/><use href="#markG" fill="#C8F031"/></svg></div>
+          <div class="sq s60"><svg viewBox="0 0 1024 1024"><rect width="1024" height="1024" fill="#0B0C0E"/><use href="#markG" fill="#C8F031"/></svg></div>
+        </div>
+        <div class="lbl">120 · 60 px</div>
+      </div>
+    </div>
+    <p class="why" style="margin-top:22px"><b>Выбор заливки:</b> лайм на почти-чёрном — база тёмной темы приложения, «инструментальный» тон; инверсия оставлена как альтернативная иконка.</p>
+  </div>
+
+  <h2>Файлы</h2>
+  <div class="files">
+    design/icon/<b>gym-tracker-icon.svg</b> — финал, лайм на чёрном, 1024×1024<br>
+    design/icon/<b>gym-tracker-icon-inverse.svg</b> — инверсия, чёрное на лайме<br>
+    design/icon/android/<b>ic_launcher_background.svg</b> — adaptive: фон<br>
+    design/icon/android/<b>ic_launcher_foreground.svg</b> — adaptive: передний слой (safe-zone 66/108)<br>
+    design/icon/variants/<b>variant-b-rest-ring.svg</b> · <b>variant-c-set-bars.svg</b> — альтернативы
+  </div>
+</div>
+</body>
+</html>
