@@ -5,7 +5,7 @@ import { fonts, Palette } from '@/constants/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { translateReason, useT } from '@/i18n';
 import { REASON_TAGS, ReasonTag } from '@/types/workout';
-import { PrimaryButton } from './ui';
+import { PrimaryButton, Tappable } from './ui';
 
 export function ReasonPickerModal({ visible, title, selected, onSelect, onConfirm, onClose }: {
   visible: boolean;
@@ -30,17 +30,17 @@ export function ReasonPickerModal({ visible, title, selected, onSelect, onConfir
           {REASON_TAGS.map((reason) => {
             const active = selected === reason;
             return (
-              <Pressable
+              <Tappable
                 key={reason}
                 onPress={() => onSelect(active ? undefined : reason)}
                 style={[styles.tag, active && styles.tagActive]}>
                 <Text style={[styles.tagText, active && styles.tagTextActive]}>{translateReason(language, reason)}</Text>
-              </Pressable>
+              </Tappable>
             );
           })}
         </View>
         <PrimaryButton label={t('common.done')} onPress={onConfirm} />
-        <Pressable onPress={onClose} style={styles.cancel}><Text style={styles.cancelText}>{t('common.cancel')}</Text></Pressable>
+        <Tappable onPress={onClose} style={styles.cancel}><Text style={styles.cancelText}>{t('common.cancel')}</Text></Tappable>
       </View>
     </Modal>
   );

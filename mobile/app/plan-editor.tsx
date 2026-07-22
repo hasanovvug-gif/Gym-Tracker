@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Platform, StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { Card, Heading, OutlineButton, Screen, Toggle } from '@/components/ui';
+import { Card, Heading, OutlineButton, Screen, Tappable, Toggle } from '@/components/ui';
 import { fonts, Palette } from '@/constants/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useT } from '@/i18n';
@@ -41,8 +41,8 @@ export default function PlanEditorScreen() {
   return (
     <Screen>
       <View style={styles.nav}>
-        <Pressable onPress={() => router.back()} style={styles.navButton}><Text style={styles.navText}>{t('planEditor.back')}</Text></Pressable>
-        <Pressable onPress={() => router.back()} style={styles.navButton}><Text style={styles.navDone}>{t('common.done')}</Text></Pressable>
+        <Tappable onPress={() => router.back()} style={styles.navButton}><Text style={styles.navText}>{t('planEditor.back')}</Text></Tappable>
+        <Tappable onPress={() => router.back()} style={styles.navButton}><Text style={styles.navDone}>{t('common.done')}</Text></Tappable>
       </View>
       <Heading size={28}>{t('planEditor.title')}</Heading>
 
@@ -60,15 +60,15 @@ export default function PlanEditorScreen() {
                   style={[styles.dayName, styles.inputUnderline]}
                 />
               ) : (
-                <Pressable style={styles.flex} onPress={() => setExpandedId(day.id)}>
+                <Tappable style={styles.flex} onPress={() => setExpandedId(day.id)}>
                   <Text style={styles.dayName}>{t('home.planTitle', { day: dayIndex + 1, name: resolveName(day, t) })}</Text>
-                </Pressable>
+                </Tappable>
               )}
-              <Pressable onPress={() => moveDay(day.id, -1)} disabled={dayIndex === 0} style={styles.iconButton}><Text style={styles.orderIcon}>↑</Text></Pressable>
-              <Pressable onPress={() => moveDay(day.id, 1)} disabled={dayIndex === days.length - 1} style={styles.iconButton}><Text style={styles.orderIcon}>↓</Text></Pressable>
-              <Pressable onPress={() => expanded ? setExpandedId('') : setExpandedId(day.id)} style={styles.iconButton}>
+              <Tappable onPress={() => moveDay(day.id, -1)} disabled={dayIndex === 0} style={styles.iconButton}><Text style={styles.orderIcon}>↑</Text></Tappable>
+              <Tappable onPress={() => moveDay(day.id, 1)} disabled={dayIndex === days.length - 1} style={styles.iconButton}><Text style={styles.orderIcon}>↓</Text></Tappable>
+              <Tappable onPress={() => expanded ? setExpandedId('') : setExpandedId(day.id)} style={styles.iconButton}>
                 <Text style={styles.editLabel}>{expanded ? t('planEditor.collapse') : t('planEditor.edit')}</Text>
-              </Pressable>
+              </Tappable>
             </View>
 
             {expanded && (
@@ -78,9 +78,9 @@ export default function PlanEditorScreen() {
                     <View style={styles.exerciseHeader}>
                       <Text style={styles.handle}>≡</Text>
                       <TextInput value={resolveName(exercise, t)} onChangeText={(name) => updateExercise(day.id, exercise.id, { name })} style={styles.exerciseNameInput} accessibilityLabel={t('planEditor.exerciseName')} />
-                      <Pressable onPress={() => moveExercise(day.id, exercise.id, -1)} disabled={exerciseIndex === 0} style={styles.miniButton}><Text style={styles.orderIcon}>↑</Text></Pressable>
-                      <Pressable onPress={() => moveExercise(day.id, exercise.id, 1)} disabled={exerciseIndex === day.exercises.length - 1} style={styles.miniButton}><Text style={styles.orderIcon}>↓</Text></Pressable>
-                      <Pressable onPress={() => removeExercise(day.id, exercise.id)} style={styles.miniButton}><Text style={styles.remove}>−</Text></Pressable>
+                      <Tappable onPress={() => moveExercise(day.id, exercise.id, -1)} disabled={exerciseIndex === 0} style={styles.miniButton}><Text style={styles.orderIcon}>↑</Text></Tappable>
+                      <Tappable onPress={() => moveExercise(day.id, exercise.id, 1)} disabled={exerciseIndex === day.exercises.length - 1} style={styles.miniButton}><Text style={styles.orderIcon}>↓</Text></Tappable>
+                      <Tappable haptic="warn" onPress={() => removeExercise(day.id, exercise.id)} style={styles.miniButton}><Text style={styles.remove}>−</Text></Tappable>
                     </View>
                     <TextInput value={resolveMuscleGroup(exercise, t)} onChangeText={(muscleGroup) => updateExercise(day.id, exercise.id, { muscleGroup })} style={styles.groupInput} accessibilityLabel={t('planEditor.muscleGroup')} />
                     <View style={styles.fields}>

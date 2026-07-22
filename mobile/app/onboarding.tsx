@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Animated,
   PanResponder,
-  Pressable,
   StyleSheet,
   Text,
   useWindowDimensions,
@@ -10,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Heading, PrimaryButton } from '@/components/ui';
+import { Heading, PrimaryButton, Tappable } from '@/components/ui';
 import { fonts, Palette } from '@/constants/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useT } from '@/i18n';
@@ -69,9 +68,9 @@ export default function OnboardingScreen() {
         <View style={styles.topBar}>
           <Text style={styles.brand}>{t('onboarding.label')}</Text>
           {pageIndex < PAGE_COUNT - 1 ? (
-            <Pressable accessibilityRole="button" onPress={finish} hitSlop={12}>
+            <Tappable accessibilityRole="button" onPress={finish} hitSlop={12}>
               <Text style={styles.skip}>{t('onboarding.skip')}</Text>
-            </Pressable>
+            </Tappable>
           ) : <View />}
         </View>
 

@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, StyleSheet, Text, View } from 'react-native';
 
-import { Card, Heading, Screen, Toggle } from '@/components/ui';
+import { Card, Heading, Screen, Tappable, Toggle } from '@/components/ui';
 import { fonts, Palette } from '@/constants/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useGymStore } from '@/store/useGymStore';
@@ -81,15 +81,15 @@ export default function SettingsScreen() {
       </Card>
 
       <Card style={styles.groupCard}>
-        <Pressable onPress={() => exportGymData(language)} style={[styles.actionRow, styles.rowBorder]}>
+        <Tappable onPress={() => exportGymData(language)} style={[styles.actionRow, styles.rowBorder]}>
           <Text style={styles.actionText}>{t('settings.export')}</Text><Text style={styles.chevron}>›</Text>
-        </Pressable>
-        <Pressable onPress={() => setOnboardingSeen(false)} style={[styles.actionRow, styles.rowBorder]}>
+        </Tappable>
+        <Tappable onPress={() => setOnboardingSeen(false)} style={[styles.actionRow, styles.rowBorder]}>
           <Text style={styles.actionText}>{t('settings.showOnboarding')}</Text><Text style={styles.chevron}>›</Text>
-        </Pressable>
-        <Pressable onPress={confirmReset} style={styles.actionRow}>
+        </Tappable>
+        <Tappable haptic="warn" onPress={confirmReset} style={styles.actionRow}>
           <Text style={[styles.actionText, { color: c.danger }]}>{t('settings.reset')}</Text><Text style={styles.chevron}>›</Text>
-        </Pressable>
+        </Tappable>
       </Card>
     </Screen>
   );
@@ -98,9 +98,9 @@ export default function SettingsScreen() {
 function Choice({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   const { styles } = useThemedStyles();
   return (
-    <Pressable onPress={onPress} accessibilityState={{ selected }} style={[styles.choice, selected && styles.choiceSelected]}>
+    <Tappable haptic="select" onPress={onPress} accessibilityState={{ selected }} style={[styles.choice, selected && styles.choiceSelected]}>
       <Text style={[styles.choiceText, selected && styles.choiceTextSelected]}>{label}</Text>
-    </Pressable>
+    </Tappable>
   );
 }
 

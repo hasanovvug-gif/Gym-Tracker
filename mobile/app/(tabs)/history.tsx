@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Line, Polyline } from 'react-native-svg';
 
-import { Card, Heading, Screen } from '@/components/ui';
+import { Card, Heading, Screen, Tappable } from '@/components/ui';
 import { fonts, Palette } from '@/constants/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { translateReason, useT } from '@/i18n';
@@ -26,7 +26,7 @@ export default function HistoryScreen() {
       {history.map((session) => {
         const expanded = expandedId === session.id;
         return (
-          <Pressable key={session.id} onPress={() => setExpandedId(expanded ? '' : session.id)}>
+          <Tappable haptic="select" scaleTo={0.99} key={session.id} onPress={() => setExpandedId(expanded ? '' : session.id)}>
             <Card accent={expanded}>
               <View style={styles.sessionHeader}>
                 <Text style={styles.sessionTitle}>{t('common.day')} — {resolveDayName(session, t)}</Text>
@@ -62,7 +62,7 @@ export default function HistoryScreen() {
                 </View>
               )}
             </Card>
-          </Pressable>
+          </Tappable>
         );
       })}
     </Screen>

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { StyleSheet, Text, TextInput, View } from 'react-native';
 
-import { Card, Heading, OutlineButton, ProgressBar, Screen, Segmented } from '@/components/ui';
+import { Card, Heading, OutlineButton, ProgressBar, Screen, Segmented, Tappable } from '@/components/ui';
 import { fonts, Palette } from '@/constants/theme';
 import { dateKey } from '@/data/supplementData';
 import { useTheme } from '@/hooks/useTheme';
@@ -75,13 +75,13 @@ function TodayTab() {
               {items.map((supplement) => {
                 const checked = Boolean(todayLog?.taken[`${supplement.id}:${slot}`]);
                 return (
-                  <Pressable key={supplement.id} onPress={() => toggleSupplement(supplement.id, slot)}>
+                  <Tappable haptic="select" key={supplement.id} onPress={() => toggleSupplement(supplement.id, slot)}>
                     <Card accent={!checked && slot === 'pre_workout'} style={[styles.checkCard, checked && styles.checkedCard]}>
                       <View style={[styles.checkbox, checked && styles.checkboxDone]}>{checked && <Text style={styles.checkmark}>✓</Text>}</View>
                       <Text style={styles.checkName}>{resolveName(supplement, t)}</Text>
                       <Text style={styles.checkDose}>{resolveDose(supplement, t)}</Text>
                     </Card>
-                  </Pressable>
+                  </Tappable>
                 );
               })}
             </View>
@@ -123,7 +123,7 @@ function StockTab() {
                 <Text style={styles.stockName}>{resolveName(supplement, t)}</Text>
                 <View style={styles.stockRight}>
                   <Text style={[styles.stockMeta, isLow && styles.warningColor]}>{formatNumber(supplement.stock, language)} {resolveStockUnit(supplement, t)} · {estimate}</Text>
-                  <Pressable onPress={() => replenish(supplement.id, 30)} style={styles.replenishButton}><Text style={styles.replenishText}>+30</Text></Pressable>
+                  <Tappable haptic="success" onPress={() => replenish(supplement.id, 30)} style={styles.replenishButton}><Text style={styles.replenishText}>+30</Text></Tappable>
                 </View>
               </View>
               <ProgressBar progress={ratio} color={isLow ? c.warning : c.accent} />
@@ -210,16 +210,16 @@ function ScheduleTab() {
               <TextInput accessibilityLabel={t('supplements.nameLabel')} value={resolveName(supplement, t)} onChangeText={(name) => updateSupplement(supplement.id, { name })} style={styles.supplementNameInput} />
               <TextInput accessibilityLabel={t('supplements.doseLabel')} value={resolveDose(supplement, t)} onChangeText={(dose) => updateSupplement(supplement.id, { dose })} style={styles.doseInput} />
             </View>
-            <Pressable onPress={() => removeSupplement(supplement.id)} style={styles.removeButton}><Text style={styles.removeText}>−</Text></Pressable>
+            <Tappable haptic="warn" onPress={() => removeSupplement(supplement.id)} style={styles.removeButton}><Text style={styles.removeText}>−</Text></Tappable>
           </View>
           <View style={styles.scheduleSlots}>
             {SUPPLEMENT_SLOTS.map((slot) => {
               const selected = supplement.schedule.includes(slot);
               const label = t(supplementSlotKeys[slot]);
               return (
-                <Pressable key={slot} onPress={() => toggleSupplementSlot(supplement.id, slot)} style={[styles.slotChip, selected && styles.slotChipSelected]}>
+                <Tappable haptic="select" key={slot} onPress={() => toggleSupplementSlot(supplement.id, slot)} style={[styles.slotChip, selected && styles.slotChipSelected]}>
                   <Text style={[styles.slotChipText, selected && styles.slotChipTextSelected]}>{label}</Text>
-                </Pressable>
+                </Tappable>
               );
             })}
           </View>

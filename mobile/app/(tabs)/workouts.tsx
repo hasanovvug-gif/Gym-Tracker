@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { Card, Heading, PrimaryButton, Screen } from '@/components/ui';
+import { Card, Heading, PrimaryButton, Screen, Tappable } from '@/components/ui';
 import { fonts, Palette } from '@/constants/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useT } from '@/i18n';
@@ -28,9 +28,9 @@ export default function WorkoutsScreen() {
     <Screen>
       <View style={styles.header}>
         <Heading>{t('workouts.title')}</Heading>
-        <Pressable onPress={() => router.push('/plan-editor')} style={styles.editButton}>
+        <Tappable onPress={() => router.push('/plan-editor')} style={styles.editButton}>
           <Text style={styles.editText}>{t('workouts.editPlan')}</Text>
-        </Pressable>
+        </Tappable>
       </View>
 
       {activeSession && (
@@ -46,7 +46,7 @@ export default function WorkoutsScreen() {
       ) : days.map((day, index) => {
         const expanded = expandedId === day.id;
         return (
-          <Pressable key={day.id} onPress={() => setExpandedId(expanded ? '' : day.id)}>
+          <Tappable haptic="select" scaleTo={0.99} key={day.id} onPress={() => setExpandedId(expanded ? '' : day.id)}>
             <Card accent={expanded}>
               <View style={styles.dayHeader}>
                 <View style={styles.flex}>
@@ -74,7 +74,7 @@ export default function WorkoutsScreen() {
                 </View>
               )}
             </Card>
-          </Pressable>
+          </Tappable>
         );
       })}
     </Screen>

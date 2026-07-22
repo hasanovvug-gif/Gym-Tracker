@@ -1,6 +1,7 @@
-import { ReactNode, useMemo } from 'react';
+import { ReactNode, useEffect, useMemo } from 'react';
 import {
   Pressable,
+  PressableProps,
   ScrollView,
   StyleProp,
   StyleSheet,
@@ -9,10 +10,84 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import Animated, {
+  interpolateColor,
+  LinearTransition,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { fonts, Palette } from '@/constants/theme';
+import { haptics } from '@/hooks/useFeedback';
 import { useTheme } from '@/hooks/useTheme';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+/** Ход костяшки тоггла: ширина 46 − padding 2×2 − костяшка 24. */
+const TOGGLE_TRAVEL = 18;
+
+/** Мягкое появление контента экрана. */
+function useEnter() {
+  const progress = useSharedValue(0);
+  useEffect(() => {
+    progress.value = withTiming(1, { duration: 280 });
+  }, [progress]);
+  return useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ translateY: (1 - progress.value) * 14 }],
+  }));
+}
+
+/** Кнопка «проседает» под пальцем и отдаёт тактильный отклик. Базис всего интерактива. */
+export function Tappable({
+  children,
+  onPress,
+  haptic = 'light',
+  scaleTo = 0.96,
+  disabled = false,
+  style,
+  ...rest
+}: {
+  children: ReactNode;
+  onPress: () => void;
+  haptic?: keyof typeof haptics | 'none';
+  scaleTo?: number;
+  disabled?: boolean;
+  style?: StyleProp<ViewStyle>;
+} & Omit<PressableProps, 'onPress' | 'style' | 'children' | 'disabled'>) {
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+  const animated = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  return (
+    <AnimatedPressable
+      disabled={disabled}
+      onPressIn={() => {
+        scale.value = withTiming(scaleTo, { duration: 90 });
+        opacity.value = withTiming(0.85, { duration: 90 });
+      }}
+      onPressOut={() => {
+        scale.value = withSpring(1, { damping: 14, stiffness: 320, mass: 0.5 });
+        opacity.value = withTiming(1, { duration: 140 });
+      }}
+      onPress={() => {
+        if (haptic !== 'none') haptics[haptic]();
+        onPress();
+      }}
+      style={[animated, disabled && styles0.disabled, style]}
+      {...rest}>
+      {children}
+    </AnimatedPressable>
+  );
+}
+
+const styles0 = StyleSheet.create({ disabled: { opacity: 0.4 } });
 
 function useThemedStyles() {
   const c = useTheme();
@@ -26,7 +101,12 @@ export function Screen({ children, scroll = true, contentStyle }: {
   contentStyle?: StyleProp<ViewStyle>;
 }) {
   const { styles } = useThemedStyles();
-  const content = <View style={[styles.content, contentStyle]}>{children}</View>;
+  const enter = useEnter();
+  const content = (
+    <Animated.View style={[styles.content, enter, contentStyle]}>
+      {children}
+    </Animated.View>
+  );
   return (
     <SafeAreaView edges={['top']} style={styles.safe}>
       {scroll ? (
@@ -58,14 +138,16 @@ export function Card({ children, accent = false, warning = false, style }: {
 }) {
   const { styles } = useThemedStyles();
   return (
-    <View style={[
-      styles.card,
-      accent && styles.cardAccent,
-      warning && styles.cardWarning,
-      style,
-    ]}>
+    <Animated.View
+      layout={LinearTransition.duration(220)}
+      style={[
+        styles.card,
+        accent && styles.cardAccent,
+        warning && styles.cardWarning,
+        style,
+      ]}>
       {children}
-    </View>
+    </Animated.View>
   );
 }
 
@@ -77,14 +159,15 @@ export function PrimaryButton({ label, onPress, disabled = false, style }: {
 }) {
   const { styles } = useThemedStyles();
   return (
-    <Pressable
+    <Tappable
       accessibilityRole="button"
       accessibilityLabel={label}
       disabled={disabled}
+      haptic="tap"
       onPress={onPress}
-      style={({ pressed }) => [styles.primaryButton, disabled && styles.disabled, pressed && styles.pressed, style]}>
+      style={[styles.primaryButton, style]}>
       <Text style={styles.primaryButtonText}>{label}</Text>
-    </Pressable>
+    </Tappable>
   );
 }
 
@@ -96,13 +179,14 @@ export function OutlineButton({ label, onPress, danger = false, style }: {
 }) {
   const { c, styles } = useThemedStyles();
   return (
-    <Pressable
+    <Tappable
       accessibilityRole="button"
       accessibilityLabel={label}
+      haptic={danger ? 'warn' : 'light'}
       onPress={onPress}
-      style={({ pressed }) => [styles.outlineButton, danger && styles.outlineDanger, pressed && styles.pressed, style]}>
+      style={[styles.outlineButton, danger && styles.outlineDanger, style]}>
       <Text style={[styles.outlineButtonText, danger && { color: c.danger }]}>{label}</Text>
-    </Pressable>
+    </Tappable>
   );
 }
 
@@ -131,14 +215,18 @@ export function Segmented<T extends string>({ options, value, onChange }: {
       {options.map((option) => {
         const selected = option.value === value;
         return (
-          <Pressable
+          <Tappable
             key={option.value}
             accessibilityRole="button"
             accessibilityState={{ selected }}
+            haptic="select"
+            scaleTo={0.94}
             onPress={() => onChange(option.value)}
-            style={({ pressed }) => [styles.segment, selected && styles.segmentSelected, pressed && styles.pressed]}>
-            <Text numberOfLines={1} style={[styles.segmentText, selected && styles.segmentTextSelected]}>{option.label}</Text>
-          </Pressable>
+            style={styles.segmentWrap}>
+            <View style={[styles.segment, selected && styles.segmentSelected]}>
+              <Text numberOfLines={1} style={[styles.segmentText, selected && styles.segmentTextSelected]}>{option.label}</Text>
+            </View>
+          </Tappable>
         );
       })}
     </View>
@@ -146,16 +234,33 @@ export function Segmented<T extends string>({ options, value, onChange }: {
 }
 
 export function Toggle({ value, onPress, label }: { value: boolean; onPress: () => void; label: string }) {
-  const { styles } = useThemedStyles();
+  const { c, styles } = useThemedStyles();
+  const progress = useSharedValue(value ? 1 : 0);
+
+  useEffect(() => {
+    progress.value = withTiming(value ? 1 : 0, { duration: 200 });
+  }, [progress, value]);
+
+  const track = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(progress.value, [0, 1], [c.borderDashed, c.accent]),
+  }));
+  const knob = useAnimatedStyle(() => ({
+    transform: [{ translateX: progress.value * TOGGLE_TRAVEL }],
+    backgroundColor: interpolateColor(progress.value, [0, 1], [c.textSecondary, c.background]),
+  }));
+
   return (
-    <Pressable
+    <Tappable
       accessibilityRole="switch"
       accessibilityLabel={label}
       accessibilityState={{ checked: value }}
-      onPress={onPress}
-      style={[styles.toggle, value && styles.toggleOn]}>
-      <View style={[styles.toggleKnob, value && styles.toggleKnobOn]} />
-    </Pressable>
+      haptic="select"
+      scaleTo={0.92}
+      onPress={onPress}>
+      <Animated.View style={[styles.toggle, track]}>
+        <Animated.View style={[styles.toggleKnob, knob]} />
+      </Animated.View>
+    </Tappable>
   );
 }
 
@@ -174,14 +279,13 @@ const createStyles = (c: Palette) => StyleSheet.create({
   outlineButtonText: { color: c.textSecondary, fontFamily: fonts.bodyBold, fontSize: 13 },
   progressTrack: { width: '100%', backgroundColor: c.trackBg, overflow: 'hidden' },
   segmented: { flexDirection: 'row', gap: 4, backgroundColor: c.surface, padding: 4, borderRadius: 14 },
-  segment: { flex: 1, minHeight: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 11, paddingHorizontal: 4 },
+  segmentWrap: { flex: 1 },
+  segment: { minHeight: 36, alignItems: 'center', justifyContent: 'center', borderRadius: 11, paddingHorizontal: 4 },
   segmentSelected: { backgroundColor: c.accent },
   segmentText: { color: c.textSecondary, fontFamily: fonts.bodySemiBold, fontSize: 11 },
   segmentTextSelected: { color: c.accentText, fontFamily: fonts.bodyExtraBold },
-  toggle: { width: 46, height: 28, borderRadius: 14, padding: 2, backgroundColor: c.borderDashed, justifyContent: 'center' },
-  toggleOn: { backgroundColor: c.accent },
-  toggleKnob: { width: 24, height: 24, borderRadius: 12, backgroundColor: c.textSecondary },
-  toggleKnobOn: { alignSelf: 'flex-end', backgroundColor: c.background },
+  toggle: { width: 46, height: 28, borderRadius: 14, padding: 2, justifyContent: 'center' },
+  toggleKnob: { width: 24, height: 24, borderRadius: 12 },
   pressed: { opacity: 0.72 },
   disabled: { opacity: 0.4 },
 });

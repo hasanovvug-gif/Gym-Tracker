@@ -1,8 +1,8 @@
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 
-import { Card, Heading, PrimaryButton, Screen } from '@/components/ui';
+import { Card, Heading, PrimaryButton, Screen, Tappable } from '@/components/ui';
 import { fonts, Palette } from '@/constants/theme';
 import { useNow } from '@/hooks/useNow';
 import { useTheme } from '@/hooks/useTheme';
@@ -46,7 +46,7 @@ export default function HomeScreen() {
       </View>
 
       {activeSession ? (
-        <Pressable onPress={() => router.push('/workout-session')} style={styles.activeCard}>
+        <Tappable haptic="tap" scaleTo={0.98} onPress={() => router.push('/workout-session')} style={styles.activeCard}>
           <View style={styles.activeTop}>
             <Text style={styles.activeEyebrow}>{activeSession.phase === 'paused' ? t('home.paused') : t('home.active')}</Text>
             <View style={styles.activeDot} />
@@ -54,7 +54,7 @@ export default function HomeScreen() {
           <Text style={styles.activeTimer}>{formatDuration(activeSeconds)}</Text>
           <Text style={styles.activeMeta}>{t('home.activeMeta', { day: workoutDays.findIndex((day) => day.id === activeSession.dayId) + 1, name: resolveDayName(activeSession, t), current: activeSession.currentExerciseIndex + 1, total: activeSession.exercises.length })}</Text>
           <View style={styles.continueButton}><Text style={styles.continueText}>{t('common.continue')}</Text></View>
-        </Pressable>
+        </Tappable>
       ) : plannedDay ? (
         <Card style={styles.planCard}>
           <Text style={styles.eyebrow}>{t('home.todayPlan')}</Text>
@@ -73,7 +73,7 @@ export default function HomeScreen() {
       </View>
 
       {lastSession && (
-        <Pressable onPress={() => router.push('/(tabs)/history')}>
+        <Tappable onPress={() => router.push('/(tabs)/history')}>
           <Card>
             <Text style={styles.lastEyebrow}>{t('home.lastWorkout')}</Text>
             <View style={styles.lastHeader}>
@@ -86,7 +86,7 @@ export default function HomeScreen() {
               <Text style={styles.lastMeta}>{t('common.sets', { count: lastSession.exercises.reduce((sum, exercise) => sum + exercise.completedSets, 0) })}</Text>
             </View>
           </Card>
-        </Pressable>
+        </Tappable>
       )}
     </Screen>
   );

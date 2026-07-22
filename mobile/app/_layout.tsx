@@ -68,7 +68,7 @@ export default function RootLayout() {
         <Stack.Protected guard={onboardingSeen}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="plan-editor" options={{ animation: 'slide_from_right' }} />
-          <Stack.Screen name="workout-session" options={{ animation: 'slide_from_right', gestureEnabled: false }} />
+          <Stack.Screen name="workout-session" options={{ animation: 'slide_from_bottom', gestureEnabled: false }} />
         </Stack.Protected>
         <Stack.Protected guard={!onboardingSeen}>
           <Stack.Screen name="onboarding" options={{ animation: 'fade', gestureEnabled: false }} />

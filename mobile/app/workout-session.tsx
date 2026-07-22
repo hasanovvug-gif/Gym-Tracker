@@ -1,14 +1,13 @@
-import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
-import * as Speech from 'expo-speech';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ReasonPickerModal } from '@/components/ReasonPickerModal';
-import { Card, Heading, OutlineButton, PrimaryButton, ProgressBar, Screen } from '@/components/ui';
+import { Card, Heading, OutlineButton, PrimaryButton, ProgressBar, Screen, Tappable } from '@/components/ui';
 import { fonts, Palette } from '@/constants/theme';
+import { haptics, playRestDone } from '@/hooks/useFeedback';
 import { useNow } from '@/hooks/useNow';
 import { useTheme } from '@/hooks/useTheme';
 import { translateReason, useT } from '@/i18n';
@@ -29,7 +28,7 @@ export default function WorkoutSessionScreen() {
   const { styles } = useThemedStyles();
   const router = useRouter();
   const now = useNow();
-  const { t, language } = useT();
+  const { t } = useT();
   const active = useGymStore((state) => state.activeSession);
   const history = useGymStore((state) => state.history);
   const recentSessionId = useGymStore((state) => state.recentSessionId);
@@ -45,10 +44,10 @@ export default function WorkoutSessionScreen() {
 
   useEffect(() => {
     if (!active || active.phase !== 'rest' || restRemaining > 0) return;
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
-    if (soundEnabled) Speech.speak(t('session.restVoice'), { language: { RU: 'ru-RU', UA: 'uk-UA', EN: 'en-GB' }[language], rate: 0.9 });
+    haptics.success();
+    if (soundEnabled) void playRestDone();
     actions.endRest();
-  }, [active, actions, language, restRemaining, soundEnabled, t]);
+  }, [active, actions, restRemaining, soundEnabled]);
 
   const finish = () => {
     const id = actions.finishWorkout();
@@ -141,9 +140,9 @@ export default function WorkoutSessionScreen() {
           <Text style={styles.exerciseCounter}>{t('common.exercise')} {active.currentExerciseIndex + 1} <Text style={styles.dim}>/ {active.exercises.length}</Text></Text>
           <View style={styles.headerRight}>
             <Text style={styles.timer}>{formatDuration(activeSeconds)}</Text>
-            <Pressable onPress={actions.pauseWorkout} style={styles.pauseButton} accessibilityLabel={t('session.pauseAction')}>
+            <Tappable onPress={actions.pauseWorkout} style={styles.pauseButton} accessibilityLabel={t('session.pauseAction')}>
               <Text style={styles.pauseText}>❙❙ {t('common.pause')}</Text>
-            </Pressable>
+            </Tappable>
           </View>
         </View>
         <ProgressBar progress={progress} height={5} />
@@ -155,12 +154,12 @@ export default function WorkoutSessionScreen() {
 
         {!exercise.isTimeBased && (
           <Card style={styles.weightCard}>
-            <Pressable onPress={() => actions.adjustWeight(-2.5)} style={styles.weightButton}><Text style={styles.weightMinus}>−</Text></Pressable>
+            <Tappable onPress={() => actions.adjustWeight(-2.5)} style={styles.weightButton}><Text style={styles.weightMinus}>−</Text></Tappable>
             <View style={styles.weightCenter}>
               <Text style={styles.weight}>{exercise.weight} <Text style={styles.weightUnit}>{t('common.kg')}</Text></Text>
               <Text style={styles.weightLabel}>{t('session.workingWeight')}</Text>
             </View>
-            <Pressable onPress={() => actions.adjustWeight(2.5)} style={styles.weightButton}><Text style={styles.weightPlus}>+</Text></Pressable>
+            <Tappable onPress={() => actions.adjustWeight(2.5)} style={styles.weightButton}><Text style={styles.weightPlus}>+</Text></Tappable>
           </Card>
         )}
 
@@ -176,9 +175,9 @@ export default function WorkoutSessionScreen() {
                 <Text style={[styles.setTitle, !complete && !current && styles.setFuture]}>{t('common.set', { count: index + 1 })}</Text>
                 <Text style={styles.setMeta}>{exercise.isTimeBased ? `${exercise.secondsPerSet ?? 60} ${t('common.seconds')}` : `${t('session.reps', { count: exercise.reps })}${exercise.weight > 0 ? ` · ${exercise.weight} ${t('common.kg')}` : ''}`}</Text>
                 {current && (
-                  <Pressable onPress={() => { Haptics.selectionAsync().catch(() => undefined); actions.completeSet(); }} style={styles.doneButton}>
+                  <Tappable haptic="success" onPress={() => actions.completeSet()} style={styles.doneButton}>
                     <Text style={styles.doneText}>{t('session.ready')}</Text>
-                  </Pressable>
+                  </Tappable>
                 )}
               </View>
             );
@@ -186,18 +185,18 @@ export default function WorkoutSessionScreen() {
         </View>
 
         <View style={styles.resolutionRow}>
-          <Pressable onPress={() => openResolution('skipped')} style={styles.resolutionButton}>
+          <Tappable onPress={() => openResolution('skipped')} style={styles.resolutionButton}>
             <Text style={styles.resolutionTitle}>{t('session.skip')}</Text><Text style={styles.resolutionHint}>{t('session.skipHint')}</Text>
-          </Pressable>
-          <Pressable onPress={() => openResolution('ended_early')} style={styles.resolutionButton}>
+          </Tappable>
+          <Tappable onPress={() => openResolution('ended_early')} style={styles.resolutionButton}>
             <Text style={styles.resolutionTitle}>{t('session.endEarly')}</Text><Text style={styles.resolutionHint}>{t('session.credited', { done: exercise.completedSets, total: exercise.plannedSets })}</Text>
-          </Pressable>
+          </Tappable>
         </View>
 
         <View style={styles.footerNav}>
-          <Pressable disabled={active.currentExerciseIndex === 0} onPress={() => actions.selectExercise(active.currentExerciseIndex - 1)} style={styles.navSquare}><Text style={styles.navArrow}>‹</Text></Pressable>
-          <Pressable onPress={confirmFinish} style={styles.finishButton}><Text style={styles.finishText}>{t('session.finish')}</Text></Pressable>
-          <Pressable disabled={active.currentExerciseIndex === active.exercises.length - 1} onPress={() => actions.selectExercise(active.currentExerciseIndex + 1)} style={styles.navSquare}><Text style={styles.navArrow}>›</Text></Pressable>
+          <Tappable disabled={active.currentExerciseIndex === 0} onPress={() => actions.selectExercise(active.currentExerciseIndex - 1)} style={styles.navSquare}><Text style={styles.navArrow}>‹</Text></Tappable>
+          <Tappable haptic="success" onPress={confirmFinish} style={styles.finishButton}><Text style={styles.finishText}>{t('session.finish')}</Text></Tappable>
+          <Tappable disabled={active.currentExerciseIndex === active.exercises.length - 1} onPress={() => actions.selectExercise(active.currentExerciseIndex + 1)} style={styles.navSquare}><Text style={styles.navArrow}>›</Text></Tappable>
         </View>
       </ScrollView>
 
@@ -234,7 +233,7 @@ function RestView({ exerciseName, exerciseIndex, totalExercises, activeSeconds, 
       <View style={styles.restTop}>
         <View style={styles.sessionHeader}>
           <Text style={styles.exerciseCounter}>{t('common.exercise')} {exerciseIndex + 1} / {totalExercises}</Text>
-          <View style={styles.headerRight}><Text style={styles.timer}>{formatDuration(activeSeconds)}</Text><Pressable onPress={onPause} style={styles.pauseButton}><Text style={styles.pauseText}>❙❙ {t('common.pause')}</Text></Pressable></View>
+          <View style={styles.headerRight}><Text style={styles.timer}>{formatDuration(activeSeconds)}</Text><Tappable onPress={onPause} style={styles.pauseButton}><Text style={styles.pauseText}>❙❙ {t('common.pause')}</Text></Tappable></View>
         </View>
         <ProgressBar progress={progress} height={5} />
         <Heading size={29} style={styles.restExercise}>{exerciseName}</Heading>
@@ -286,16 +285,16 @@ function PausedView({ activeSeconds, pausedSeconds, reason, onReason, onResume, 
           {REASON_TAGS.map((tag) => {
             const selected = reason === tag;
             return (
-              <Pressable key={tag} onPress={() => onReason(selected ? undefined : tag)} style={[styles.pauseTag, selected && styles.pauseTagSelected]}>
+              <Tappable haptic="select" key={tag} onPress={() => onReason(selected ? undefined : tag)} style={[styles.pauseTag, selected && styles.pauseTagSelected]}>
                 <Text style={[styles.pauseTagText, selected && styles.pauseTagTextSelected]}>{translateReason(language, tag)}</Text>
-              </Pressable>
+              </Tappable>
             );
           })}
         </View>
       </View>
       <View style={styles.pauseFooter}>
         <PrimaryButton label={t('common.continue')} onPress={onResume} />
-        <Pressable onPress={onFinish} style={styles.pauseFinish}><Text style={styles.pauseFinishText}>{t('session.finish')}</Text></Pressable>
+        <Tappable haptic="success" onPress={onFinish} style={styles.pauseFinish}><Text style={styles.pauseFinishText}>{t('session.finish')}</Text></Tappable>
       </View>
     </SafeAreaView>
   );

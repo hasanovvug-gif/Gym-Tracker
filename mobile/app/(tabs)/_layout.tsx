@@ -1,17 +1,30 @@
 import { Tabs } from 'expo-router';
-import { useMemo } from 'react';
-import { Platform, StyleSheet, Text, View } from 'react-native';
+import { useEffect, useMemo } from 'react';
+import { Platform, StyleSheet, Text } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 
 import { fonts, Palette } from '@/constants/theme';
+import { haptics } from '@/hooks/useFeedback';
 import { useTheme } from '@/hooks/useTheme';
 import { useT } from '@/i18n';
 
 function TabDot({ focused }: { focused: boolean }) {
   const c = useTheme();
   const styles = useMemo(() => createStyles(c), [c]);
-  return (
-    <View style={[styles.tabDot, focused && styles.tabDotFocused]} />
-  );
+  const progress = useSharedValue(focused ? 1 : 0);
+
+  useEffect(() => {
+    progress.value = focused
+      ? withSpring(1, { damping: 11, stiffness: 300, mass: 0.5 })
+      : withTiming(0, { duration: 140 });
+  }, [focused, progress]);
+
+  const animated = useAnimatedStyle(() => ({
+    opacity: progress.value,
+    transform: [{ scale: 0.4 + progress.value * 0.6 }],
+  }));
+
+  return <Animated.View style={[styles.tabDot, animated]} />;
 }
 
 function TabLabel({ focused, color, label }: { focused: boolean; color: string; label: string }) {
@@ -43,7 +56,9 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      screenListeners={{ tabPress: () => haptics.select() }}
       screenOptions={{
+        animation: 'shift',
         headerShown: false,
         tabBarActiveTintColor: c.accentInk,
         tabBarInactiveTintColor: c.textMuted,
@@ -97,8 +112,7 @@ export default function TabLayout() {
 }
 
 const createStyles = (c: Palette) => StyleSheet.create({
-  tabDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: 'transparent', marginBottom: 5 },
-  tabDotFocused: { backgroundColor: c.accentInk },
+  tabDot: { width: 5, height: 5, borderRadius: 2.5, backgroundColor: c.accentInk, marginBottom: 5 },
   tabBar: {
     backgroundColor: c.background,
     borderTopColor: c.divider,
