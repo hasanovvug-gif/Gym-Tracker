@@ -2,7 +2,7 @@
 campaign: gym-tracker-mobile
 status: active
 started: 2026-07-22
-updated: 2026-07-22 20:10
+updated: 2026-07-22 21:30
 ---
 
 # Gym Tracker → Expo/React Native
@@ -16,17 +16,18 @@ updated: 2026-07-22 20:10
 
 ## Next step
 
-Всё закоммичено в `main` (`d3a4d5b`), **не запушено** — при желании `git push`.
+Всё закоммичено и запушено в `main` (`87c1eb9`), рабочее дерево чистое.
 
 Дальше по приоритету:
-1. Заменить шрифт **Archivo** — в нём нет кириллицы, весь RU/UA текст рендерится
-   системным fallback'ом. Кандидаты: Manrope, IBM Plex Sans. Заголовки (Oswald) — ок.
-2. Прогнать флоу на реальном айфоне через Expo Go (`cd mobile && npx expo start`,
+1. Прогнать флоу на реальном айфоне через Expo Go (`cd mobile && npx expo start`,
    в Expo Go открыть `exp://<LAN-IP>:8081`). Для симулятора нужен пароль Вугара:
    `sudo xcode-select -s /Applications/Xcode.app/Contents/Developer`.
-3. Нативный share-sheet экспорта живьём не проверялся — только веб-скачивание.
+2. Нативный share-sheet экспорта живьём не проверялся — только веб-скачивание.
 
 ## Done (recent first, max 10)
+
+- 2026-07-22 — Body-шрифт Archivo → **Manrope** (кириллица), Oswald-заголовки без изменений.
+  Проверено в браузере: `fontFamily: Manrope_*`, все веса loaded. Запушено (`87c1eb9`)
 
 - 2026-07-22 — Онбординг: 4 экрана про неочевидное, свайп + кнопки, повтор из настроек.
   Codex Sol; пейджер переписан мной на Animated+PanResponder (индикатор опережал контент)
@@ -46,8 +47,6 @@ updated: 2026-07-22 20:10
 
 ## TODO (priority)
 
-- [ ] Шрифт Archivo без кириллицы — RU/UA текст падает на системный fallback, нужна замена
-- [ ] Запушить `d3a4d5b` в origin
 - [ ] Прогнать полный флоу тренировки на реальном айфоне (Expo Go)
 - [ ] Нативный share-sheet экспорта не проверен вживую — только веб-скачивание
 - [ ] Drag-and-drop reorder в редакторе плана — сейчас кнопки ↑↓
@@ -92,8 +91,8 @@ updated: 2026-07-22 20:10
 
 ## Working state
 
-- Branch: `main`, рабочее дерево чистое, локально на 1 коммит впереди origin
+- Branch: `main`, рабочее дерево чистое, синхронно с origin
 - Worktree: `~/Documents/Projects/Gym-Tracker`
-- Last meaningful commit: `d3a4d5b` — светлая тема, i18n, экспорт, онбординг (не запушен)
+- Last meaningful commit: `87c1eb9` — body-шрифт Manrope вместо Archivo (запушен)
 - Приложение: `mobile/`, bundle id `com.vugarhasanov.gymtracker`
 - Запуск: `cd mobile && npx expo start` · симулятор — `npx expo run:ios`
