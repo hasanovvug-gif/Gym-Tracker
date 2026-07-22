@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Gym Tracker — все варианты иконки</title>
+<style>
+  :root { --bg:#0B0C0E; --ink:#F4F5F3; --dim:#8A8F86; --lime:#C8F031; --line:#1E2024; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:44px 32px 80px; background:var(--bg); color:var(--ink);
+         font:15px/1.5 -apple-system,"Helvetica Neue",Arial,sans-serif; }
+  h1 { font-size:26px; letter-spacing:.02em; margin:0 0 6px; text-transform:uppercase; }
+  h2 { font-size:13px; letter-spacing:.14em; text-transform:uppercase; color:var(--lime);
+       margin:44px 0 0; }
+  .sub { color:var(--dim); margin:0; max-width:70ch; }
+  .refbar { display:flex; align-items:center; gap:16px; margin:24px 0 8px;
+            padding:16px 20px; border:1px solid var(--line); border-radius:16px; }
+  .refbar .t { color:var(--dim); font-size:13px; }
+  .row { display:flex; align-items:center; gap:28px; padding:20px 0; border-top:1px solid var(--line); }
+  .meta { flex:1 1 300px; min-width:270px; }
+  .name { font-size:16px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+  .note { color:var(--dim); font-size:13px; margin-top:4px; }
+  .sizes { display:flex; align-items:center; gap:22px; }
+  .cell svg, .cell img { display:block; }
+  .s180 { width:180px; height:180px; }
+  .s96  { width:96px; height:96px; }
+  .s60  { width:60px; height:60px; }
+  .cap { color:#5E6360; font-size:11px; text-align:center; margin-top:6px; letter-spacing:.08em; }
+</style>
+</head>
+<body>
+<h1>Иконка Gym Tracker — все варианты</h1>
+<p class="sub">Формула AsbestosGuard: тёмный фирменный фон + белая внешняя форма контуром +
+один акцентный элемент цветом приложения, штрих 9,4% стороны. Первая группа — мои,
+вторая — Codex Sol.</p>
+
+<div class="refbar">
+  <div class="cell"><span class="s96" id="ag96"></span></div>
+  <div class="cell"><span class="s60" id="ag60"></span></div>
+  <div class="t">Референс — реальная иконка AsbestosGuard</div>
+</div>
+
+<h2>Мои варианты</h2>
+<div id="mine"></div>
+
+<h2>Codex Sol</h2>
+<div id="codex"></div>
+
+<script>
+const AG = `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="10" fill="#142940"/>
+  <path d="M24 8 L40 24 L24 40 L8 24 Z" fill="none" stroke="#fff" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M16.5 24 L31.5 24" fill="none" stroke="#F0984F" stroke-width="4.5" stroke-linecap="round"/>
+</svg>`;
+ag96.innerHTML = AG; ag60.innerHTML = AG;
+
+const D = 'M512 171 L853 512 L512 853 L171 512 Z';
+const tile = inner => `<svg viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1024" height="1024" rx="213" fill="#0B0C0E"/>${inner}</svg>`;
+const frame = `<path d="${D}" fill="none" stroke="#FFFFFF" stroke-width="96" stroke-linejoin="round"/>`;
+const lime = (d, w=96) => `<path d="${d}" fill="none" stroke="#C8F031" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+
+const mine = [
+  ["K1 · Подъём", "Та же линия референса, повёрнутая на 90°. Минимальная возможная мутация.",
+   frame + lime('M512 352 L512 672')],
+  ["K2 · Вложенный ромб", "Ромб в ромбе. Самое системное родство, семантики «спортзал» нет.",
+   frame + lime('M512 362 L662 512 L512 662 L362 512 Z')],
+  ["K3 · Подходы", "Две линии разной длины — сделано и осталось.",
+   frame + lime('M332 442 L692 442') + lime('M392 592 L632 592')],
+  ["K4 · Половина", "Нижняя половина периметра лаймовая: прогресс/объём.",
+   `<path d="M171 512 L512 171 L853 512" fill="none" stroke="#FFFFFF" stroke-width="96" stroke-linejoin="round" stroke-linecap="round"/>` +
+   lime('M853 512 L512 853 L171 512')],
+  ["K5 · Шеврон", "Стрелка вверх — рост. Понятно, но затасканный знак.",
+   frame + lime('M382 592 L512 462 L642 592')],
+  ["K6 · Гриф", "Линия референса с двумя блинами — категория читается сразу.",
+   frame + lime('M392 512 L632 512', 72) + lime('M356 446 L356 578') + lime('M668 446 L668 578')],
+];
+
+const codex = [
+  ["V1 · Подходы (Codex)", "Три штриха: короткий / длинный / короткий.",
+   frame + lime('M480 390 H544 M392 512 H632 M480 634 H544')],
+  ["V2 · Гриф (Codex)", "Линия с утолщениями на концах.",
+   frame + lime('M352 512 H672 M400 488 V536 M624 488 V536')],
+  ["V3 · Кольцо отдыха (Codex)", "Внешняя форма — незамкнутое кольцо rest-таймера.",
+   `<path d="M708 232 A342 342 0 1 1 316 232" fill="none" stroke="#FFFFFF" stroke-width="96" stroke-linecap="round"/>` +
+   lime('M352 512 H672')],
+  ["V4 · Шестиугольник (Codex)", "Новая форма ряда: ромб → гексагон.",
+   `<path d="M342 192 H682 L853 512 L682 832 H342 L171 512 Z" fill="none" stroke="#FFFFFF" stroke-width="96" stroke-linejoin="round"/>` +
+   lime('M352 512 H672')],
+];
+
+const render = list => list.map(([name, note, inner]) => `
+  <div class="row">
+    <div class="meta"><div class="name">${name}</div><div class="note">${note}</div></div>
+    <div class="sizes">
+      <div class="cell"><span class="s180">${tile(inner)}</span><div class="cap">180</div></div>
+      <div class="cell"><span class="s96">${tile(inner)}</span><div class="cap">96</div></div>
+      <div class="cell"><span class="s60">${tile(inner)}</span><div class="cap">60</div></div>
+    </div>
+    <div class="sizes">
+      <div class="cell"><span class="s60">${AG}</span><div class="cap">AG 60</div></div>
+    </div>
+  </div>`).join('');
+
+document.getElementById('mine').innerHTML  = render(mine);
+document.getElementById('codex').innerHTML = render(codex);
+document.querySelectorAll('.cell span').forEach(s => {
+  const svg = s.querySelector('svg');
+  if (svg) { svg.setAttribute('width','100%'); svg.setAttribute('height','100%');
+             svg.style.borderRadius = '22%'; svg.style.display = 'block'; }
+});
+</script>
+</body>
+</html>

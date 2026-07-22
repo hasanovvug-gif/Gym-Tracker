@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gym Tracker — icon concepts</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #0B0C0E;
+      --lime: #C8F031;
+      --panel: #141619;
+      --line: #292D31;
+      --muted: #8A9096;
+      --paper: #ECEEF0;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-width: 320px;
+      background: var(--ink);
+      color: var(--paper);
+      font-family: "Avenir Next", "Helvetica Neue", sans-serif;
+    }
+
+    .page {
+      width: min(1560px, 100%);
+      margin: 0 auto;
+      padding: 52px 36px 72px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 24px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .kicker,
+    .meta,
+    .size-label,
+    .fill-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .kicker { color: var(--lime); }
+
+    h1,
+    h2 {
+      margin: 0;
+      font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif;
+      font-stretch: condensed;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      margin-top: 7px;
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 0.95;
+      letter-spacing: -0.025em;
+    }
+
+    .meta {
+      color: var(--muted);
+      text-align: right;
+      line-height: 1.65;
+    }
+
+    .concepts {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    article {
+      min-width: 0;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      overflow: hidden;
+    }
+
+    .concept-head {
+      min-height: 112px;
+      padding: 18px 18px 16px;
+      display: grid;
+      grid-template-columns: 38px 1fr;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .number {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 11px;
+      background: var(--lime);
+      color: var(--ink);
+      font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif;
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    h2 {
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: 0.02em;
+    }
+
+    .concept-head p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .large-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 14px;
+    }
+
+    .sample {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: var(--ink);
+    }
+
+    .sample img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .fill-label {
+      padding: 9px 10px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      letter-spacing: 0.1em;
+    }
+
+    .scale-check {
+      margin: 0 14px 14px;
+      padding: 13px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      align-items: end;
+      background: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    .size-group {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+    }
+
+    .size-group.inverse { justify-content: flex-start; }
+
+    .icon-180 { width: 180px; height: 180px; }
+    .icon-60 { width: 60px; height: 60px; flex: 0 0 60px; }
+
+    .size-label {
+      margin-top: 8px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .scale-item { min-width: 0; }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    footer strong { color: var(--lime); }
+
+    @media (max-width: 1180px) {
+      .concepts { grid-template-columns: 1fr; }
+      article { max-width: 720px; }
+    }
+
+    @media (max-width: 680px) {
+      .page { padding: 30px 16px 48px; }
+      header { grid-template-columns: 1fr; align-items: start; }
+      .meta { text-align: left; }
+      .icon-180 { width: min(180px, calc(100vw - 148px)); height: auto; }
+      footer { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <div class="kicker">Gym Tracker · App Icon Study</div>
+        <h1>Три знака. Две заливки.</h1>
+      </div>
+      <div class="meta">Source 1024 × 1024<br>Scale checks 180 / 60 px</div>
+    </header>
+
+    <section class="concepts" aria-label="Три варианта иконки">
+      <article>
+        <div class="concept-head">
+          <div class="number">01</div>
+          <div><h2>G Lock</h2><p>Узкая литерная форма с плоскими срезами и тяжёлым терминалом.</p></div>
+        </div>
+        <div class="large-pair">
+          <div class="sample"><img src="1-g-lock.svg" width="1024" height="1024" alt="G Lock, лайм на чёрном"><div class="fill-label">Dark · 1024 source</div></div>
+          <div class="sample"><img src="1-g-lock-inverse.svg" width="1024" height="1024" alt="G Lock, чёрное на лайме"><div class="fill-label">Inverse · 1024 source</div></div>
+        </div>
+        <div class="scale-check">
+          <div class="size-group">
+            <div class="scale-item"><img class="icon-180" src="1-g-lock.svg" alt="G Lock 180 px"><div class="size-label">180 px</div></div>
+            <div class="scale-item"><img class="icon-60" src="1-g-lock.svg" alt="G Lock 60 px"><div class="size-label">60 px</div></div>
+          </div>
+          <div class="size-group inverse">
+            <div class="scale-item"><img class="icon-180" src="1-g-lock-inverse.svg" alt="G Lock inverse 180 px"><div class="size-label">180 px</div></div>
+            <div class="scale-item"><img class="icon-60" src="1-g-lock-inverse.svg" alt="G Lock inverse 60 px"><div class="size-label">60 px</div></div>
+          </div>
+        </div>
+      </article>
+
+      <article>
+        <div class="concept-head">
+          <div class="number">02</div>
+          <div><h2>Rest Gate</h2><p>Rest-кольцо из сессии: толстый ход, открытый сектор, круглые концы.</p></div>
+        </div>
+        <div class="large-pair">
+          <div class="sample"><img src="2-rest-gate.svg" width="1024" height="1024" alt="Rest Gate, лайм на чёрном"><div class="fill-label">Dark · 1024 source</div></div>
+          <div class="sample"><img src="2-rest-gate-inverse.svg" width="1024" height="1024" alt="Rest Gate, чёрное на лайме"><div class="fill-label">Inverse · 1024 source</div></div>
+        </div>
+        <div class="scale-check">
+          <div class="size-group">
+            <div class="scale-item"><img class="icon-180" src="2-rest-gate.svg" alt="Rest Gate 180 px"><div class="size-label">180 px</div></div>
+            <div class="scale-item"><img class="icon-60" src="2-rest-gate.svg" alt="Rest Gate 60 px"><div class="size-label">60 px</div></div>
+          </div>
+          <div class="size-group inverse">
+            <div class="scale-item"><img class="icon-180" src="2-rest-gate-inverse.svg" alt="Rest Gate inverse 180 px"><div class="size-label">180 px</div></div>
+            <div class="scale-item"><img class="icon-60" src="2-rest-gate-inverse.svg" alt="Rest Gate inverse 60 px"><div class="size-label">60 px</div></div>
+          </div>
+        </div>
+      </article>
+
+      <article>
+        <div class="concept-head">
+          <div class="number">03</div>
+          <div><h2>Set Stack</h2><p>Три полосы подходов: заполнено, текущий прогресс, ожидание.</p></div>
+        </div>
+        <div class="large-pair">
+          <div class="sample"><img src="3-set-stack.svg" width="1024" height="1024" alt="Set Stack, лайм на чёрном"><div class="fill-label">Dark · 1024 source</div></div>
+          <div class="sample"><img src="3-set-stack-inverse.svg" width="1024" height="1024" alt="Set Stack, чёрное на лайме"><div class="fill-label">Inverse · 1024 source</div></div>
+        </div>
+        <div class="scale-check">
+          <div class="size-group">
+            <div class="scale-item"><img class="icon-180" src="3-set-stack.svg" alt="Set Stack 180 px"><div class="size-label">180 px</div></div>
+            <div class="scale-item"><img class="icon-60" src="3-set-stack.svg" alt="Set Stack 60 px"><div class="size-label">60 px</div></div>
+          </div>
+          <div class="size-group inverse">
+            <div class="scale-item"><img class="icon-180" src="3-set-stack-inverse.svg" alt="Set Stack inverse 180 px"><div class="size-label">180 px</div></div>
+            <div class="scale-item"><img class="icon-60" src="3-set-stack-inverse.svg" alt="Set Stack inverse 60 px"><div class="size-label">60 px</div></div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <footer>
+      <span><strong>Safe zone:</strong> основные формы лежат внутри центральных 80%.</span>
+      <span>Без текста в SVG · без градиентов · без внешних ресурсов</span>
+    </footer>
+  </main>
+</body>
+</html>

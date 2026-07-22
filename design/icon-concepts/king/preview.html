@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Gym Tracker — иконки, семейство с AsbestosGuard</title>
+<style>
+  :root { --bg:#0B0C0E; --ink:#F4F5F3; --dim:#8A8F86; --lime:#C8F031; --line:#1E2024; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:48px 32px 80px; background:var(--bg); color:var(--ink);
+         font:15px/1.5 -apple-system, "Helvetica Neue", Arial, sans-serif; }
+  h1 { font-size:26px; letter-spacing:.02em; margin:0 0 4px; text-transform:uppercase; }
+  .sub { color:var(--dim); margin:0 0 40px; max-width:60ch; }
+  .row { display:flex; align-items:center; gap:28px; padding:22px 0; border-top:1px solid var(--line); }
+  .meta { flex:1 1 260px; min-width:240px; }
+  .name { font-size:17px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+  .name b { color:var(--lime); }
+  .note { color:var(--dim); font-size:13px; margin-top:4px; }
+  .sizes { display:flex; align-items:center; gap:20px; }
+  img, .ag { display:block; border-radius:22%; }
+  .s180 { width:180px; height:180px; }
+  .s96  { width:96px;  height:96px; }
+  .s60  { width:60px;  height:60px; }
+  .cap { color:var(--dim); font-size:11px; text-align:center; margin-top:6px; letter-spacing:.08em; }
+  .ref { border-left:1px solid var(--line); padding-left:28px; }
+  .ref .cap { color:#5E6360; }
+  .head { display:flex; gap:28px; color:var(--dim); font-size:11px; letter-spacing:.1em;
+          text-transform:uppercase; padding-bottom:10px; }
+</style>
+</head>
+<body>
+<h1>Иконка Gym Tracker · семейство</h1>
+<p class="sub">Формула AsbestosGuard: тёмный фирменный фон + белая внешняя форма контуром +
+один акцентный элемент цветом приложения. Толщина штриха везде 9,4% стороны.
+Справа от каждого варианта — реальная иконка AsbestosGuard для проверки родства.</p>
+
+<div id="rows"></div>
+
+<script>
+const AG = `<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+  <rect width="48" height="48" rx="10" fill="#142940"/>
+  <path d="M24 8 L40 24 L24 40 L8 24 Z" fill="none" stroke="#fff" stroke-width="4.5" stroke-linejoin="round"/>
+  <path d="M16.5 24 L31.5 24" fill="none" stroke="#F0984F" stroke-width="4.5" stroke-linecap="round"/>
+</svg>`;
+
+const items = [
+  ["k1-lift.svg",   "K1 · Подъём",        "Та же линия, что у AsbestosGuard, повёрнутая на 90°. Минимальная возможная мутация — вертикаль читается как движение вверх."],
+  ["k2-nested.svg", "K2 · Вложенный ромб","Ромб в ромбе: та же форма внутри себя. Самое системное родство, но семантики «спортзал» нет вовсе."],
+  ["k3-sets.svg",   "K3 · Подходы",       "Две линии разной длины — сделано и осталось. Прямое развитие одной линии референса."],
+  ["k4-half.svg",   "K4 · Половина",      "Один и тот же ромб, нижняя половина периметра лаймовая: прогресс/объём. Внутренний элемент не нужен."],
+  ["k5-up.svg",     "K5 · Шеврон",        "Стрелка вверх внутри ромба — рост. Понятнее всех остальных, но шеврон — самый ходовой знак в сторе."],
+  ["k6-bar.svg",    "K6 · Гриф",          "Линия референса с двумя блинами. Единственный вариант, где категория читается сразу."],
+];
+
+document.getElementById('rows').innerHTML = items.map(([file, name, note]) => `
+  <div class="row">
+    <div class="meta">
+      <div class="name">${name}</div>
+      <div class="note">${note}</div>
+    </div>
+    <div class="sizes">
+      <div><img class="s180" src="${file}?v=2" alt=""><div class="cap">180</div></div>
+      <div><img class="s96"  src="${file}?v=2" alt=""><div class="cap">96</div></div>
+      <div><img class="s60"  src="${file}?v=2" alt=""><div class="cap">60</div></div>
+    </div>
+    <div class="sizes ref">
+      <div><div class="ag s180">${AG}</div><div class="cap">AsbestosGuard</div></div>
+      <div><div class="ag s60">${AG}</div><div class="cap">60</div></div>
+    </div>
+  </div>
+`).join('');
+</script>
+</body>
+</html>
