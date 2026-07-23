@@ -115,11 +115,13 @@ Gymbar — щоденник тренувань, зроблений заради 
 
 ---
 
-## Support / Privacy URL
+## Support / Privacy URL — готово
 
-Нужен публичный URL поддержки — Apple требует. Варианты: страница на `asbestosguard.com`
-(быстро, но чужой домен), GitHub Pages из этого репозитория, или новый лёгкий лендинг.
-**Решение за Вугаром.**
+- **Support URL:** https://hasanovvug-gif.github.io/Gym-Tracker/
+- **Privacy Policy URL:** https://hasanovvug-gif.github.io/Gym-Tracker/privacy.html
+
+Исходники — `site/*.html` в `main`, публикуется с ветки `gh-pages` (GitHub Pages).
+Правка: меняешь `site/`, копируешь в `gh-pages`, пушишь.
 
 ## App Privacy
 

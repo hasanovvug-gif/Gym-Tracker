@@ -2,7 +2,7 @@
 campaign: gym-tracker-mobile
 status: active
 started: 2026-07-22
-updated: 2026-07-23 01:20
+updated: 2026-07-23
 ---
 
 # Gym Tracker → Expo/React Native
@@ -14,7 +14,18 @@ updated: 2026-07-23 01:20
 и в браузере. **Всё влито в `main` и запушено** (`694d48b`) — работа идёт прямо в `main`.
 Старый Vite-прототип в `src/` оставлен как есть — только референс.
 
-## Next step
+## Next step (2026-07-23)
+
+**Блокер — только руками Вугара:** приложение **Gymbar** ещё не заведено в App Store Connect.
+API Apple не умеет создавать app record. Нужно: ASC → My Apps → **+** → New App →
+platform iOS, bundle `com.vugarhasanov.gymtracker`, name **Gymbar**, primary language English,
+SKU любой (напр. `gymbar-001`). После этого сказать мне — я вытяну `ascAppId`, впишу в
+`mobile/eas.json` и залью build #7 в TestFlight одной командой.
+
+Дальше по очереди: скриншоты 6.9″ (могу снять в симуляторе), анкета App Privacy
+(«Data Not Collected», только в UI), отправка на ревью.
+
+## Старое next step
 
 Всё закоммичено и запушено в `main`, рабочее дерево чистое. Приложение
 функционально закрыто: экраны, флоу, темы, три языка, экспорт, онбординг,
@@ -28,6 +39,14 @@ updated: 2026-07-23 01:20
 3. Нативный share-sheet экспорта живьём не проверялся — только веб-скачивание.
 
 ## Done (recent first, max 10)
+
+- 2026-07-23 — **Сайт поддержки живой:** https://hasanovvug-gif.github.io/Gym-Tracker/ и
+  `/privacy.html`. Исходники `site/*.html` в `main`, публикация с ветки `gh-pages`.
+  Оба URL отвечают 200 — можно вписывать в ASC
+- 2026-07-23 — **iOS build #7 собран успешно** (`bcaef92`, IPA готов в EAS). Сборки 4–5
+  падали на `npm ci`; починено пересборкой lockfile и пином Node 24
+- 2026-07-23 — Карточка App Store на трёх языках: `docs/appstore/metadata.md`
+  (имя **Gymbar**, subtitle, keywords, описания RU/UA/EN)
 
 - 2026-07-23 — **Ассеты иконки собраны** (`a9891f1`): `icon.png` 1024 (фон `#0B0C0E`),
   `adaptive-icon.png` (прозрачный передний слой, арт ужат до 66 % — safe zone Android),
