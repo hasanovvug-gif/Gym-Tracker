@@ -1,11 +1,14 @@
-// ВАЖНО: этот файл ДУБЛИРУЕТСЯ в modules/gymbar-live-activity/ios/CompleteSetIntent.swift.
-// LiveActivityIntent обязан быть скомпилирован в бандл приложения, иначе кнопка на locked screen
-// исполняется в процессе расширения (где Activity.activities пуст) и не работает.
-// Держать обе копии БАЙТ-В-БАЙТ идентичными.
+// Лежит в targets/live-activity/_shared/ — @bacons/apple-targets кладёт этот файл
+// ОДНОВРЕМЕННО в app-таргет и в widget-таргет. Это обязательно для LiveActivityIntent:
+// iOS исполняет perform() в процессе ПРИЛОЖЕНИЯ, поэтому App Intents metadata должна быть
+// в самом .app, а не только в расширении. Не перемещать отсюда.
 import ActivityKit
 import AppIntents
 import Foundation
+import OSLog
 import UserNotifications
+
+private let intentLog = Logger(subsystem: "com.gymbar.app.liveactivity", category: "intent")
 
 private let appGroupId = "group.com.gymbar.app"
 private let completeSetEventsKey = "gymbar.completeSetEvents"
@@ -24,26 +27,36 @@ struct CompleteSetIntent: LiveActivityIntent {
   static let openAppWhenRun = false
 
   func perform() async throws -> some IntentResult {
-    guard let activity = Activity<GymbarActivityAttributes>.activities.first else {
+    intentLog.log("GYMBAR perform() START pid=\(ProcessInfo.processInfo.processIdentifier) proc=\(ProcessInfo.processInfo.processName)")
+    let all = Activity<GymbarActivityAttributes>.activities
+    intentLog.log("GYMBAR activities.count=\(all.count)")
+    guard let activity = all.first else {
+      intentLog.error("GYMBAR EXIT: no activity in this process")
       return .result()
     }
 
     let current = activity.content.state
+    intentLog.log("GYMBAR state phase=\(current.phase) canComplete=\(current.canCompleteSet) set=\(current.setCurrent)/\(current.setTotal)")
     guard current.canCompleteSet, current.phase != "paused" else {
+      intentLog.error("GYMBAR EXIT: guard canCompleteSet/paused failed")
       return .result()
     }
-    guard
-      let defaults = UserDefaults(suiteName: appGroupId),
-      defaults.bool(forKey: completeSetPendingKey) == false
-    else {
+    guard let defaults = UserDefaults(suiteName: appGroupId) else {
+      intentLog.error("GYMBAR EXIT: App Group UserDefaults nil")
+      return .result()
+    }
+    guard defaults.bool(forKey: completeSetPendingKey) == false else {
+      intentLog.error("GYMBAR EXIT: pending flag stuck true")
       return .result()
     }
     defaults.set(true, forKey: completeSetPendingKey)
 
     let next = nextState(from: current)
     await activity.update(ActivityContent(state: next, staleDate: nil))
+    intentLog.log("GYMBAR activity.update done -> phase=\(next.phase)")
     enqueueCompleteSet(defaults: defaults)
     try await syncRestNotification(for: next)
+    intentLog.log("GYMBAR perform() DONE")
     return .result()
   }
 
