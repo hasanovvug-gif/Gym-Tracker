@@ -2,22 +2,27 @@
 campaign: gym-tracker-mobile
 status: active
 started: 2026-07-22
-updated: 2026-07-23 14:50
+updated: 2026-07-23 15:20
 ---
 
 # Gym Tracker → Expo/React Native
 
 ## Где сейчас
 
-Приложение готово и собрано. **Запись Gymbar заведена в App Store Connect** —
-app id `6793901080`, bundle `com.gymbar.app`, SKU `gymbar-001`. Сайт поддержки живой,
-карточка на трёх языках написана, скриншоты 6.9″ сняты. **Приложение установлено и работает на телефоне Вугара через TestFlight.**
-Build #1 и build #2 (с фиксом `en.common.done`) оба доступны, ставить надо второй.
-Всё в `main`, дерево чистое, синхронно с origin.
+**Gymbar отправлен на ревью в App Store** (23.07.2026, build #2). Карточка полностью заполнена
+руками Вугара в UI ASC: скриншоты (10 шт, 1284×2778, с полями сверху/снизу — телефон не обрезан
+по бокам), promo/description/keywords на RU/EN/UA, категория «Здоровье и фитнес», цена Free,
+App Privacy — Data Not Collected, возрастной рейтинг 4+, копирайт «2026 Vugar Hasanov».
+Ждём решения Apple — обычно 24–48 часов, придёт письмо на почту.
+
+**Отложено сознательно:** DSA (Digital Services Act, статус трейдера в ЕС) — Вугар решил
+разобраться с этим позже, на текущую отправку не блокирует.
 
 ## Next step
 
-Всё оставшееся — руками Вугара в UI App Store Connect, API этого не даёт:
+- [ ] Дождаться результата ревью Apple (approve / reject)
+- [ ] Если reject — разобрать причину, поправить и переотправить
+- [ ] Если approve — решить дальше руками Вугара в UI App Store Connect (API этого не даёт):
 
 1. Загрузить скриншоты из `docs/appstore/screenshots/` (iPhone 6.9", порядок по номерам)
 2. Вставить тексты из `docs/appstore/metadata.md` + оба URL сайта поддержки
