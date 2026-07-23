@@ -2,7 +2,7 @@
 
 ## Active
 
-- **gym-tracker-mobile** — переезд Gym Tracker с Vite-веба на Expo/RN под App Store · updated 2026-07-22 15:05
+- **gym-tracker-mobile** — Gymbar на Expo/RN, заведён в App Store Connect, ждём TestFlight · updated 2026-07-23 14:10
 
 ## Paused
 

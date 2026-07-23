@@ -2,43 +2,42 @@
 campaign: gym-tracker-mobile
 status: active
 started: 2026-07-22
-updated: 2026-07-23
+updated: 2026-07-23 14:10
 ---
 
 # Gym Tracker → Expo/React Native
 
 ## Где сейчас
 
-Приложение полностью реализовано на Expo/RN (SDK 54): все экраны из дизайна, полный флоу
-тренировки, добавки, история, настройки. Проверено визуально в симуляторе iPhone 17 Pro
-и в браузере. **Всё влито в `main` и запушено** (`694d48b`) — работа идёт прямо в `main`.
-Старый Vite-прототип в `src/` оставлен как есть — только референс.
+Приложение готово и собрано. **Запись Gymbar заведена в App Store Connect** —
+app id `6793901080`, bundle `com.gymbar.app`, SKU `gymbar-001`. Сайт поддержки живой,
+карточка на трёх языках написана, скриншоты 6.9″ сняты. Первая сборка на новом
+bundle ID (build #1) залита в TestFlight, вторая (с фиксом `en.common.done`) в очереди.
+Всё в `main`, рабочее дерево чистое, синхронно с origin.
 
-## Next step (2026-07-23)
+## Next step
 
-**Блокер — только руками Вугара:** приложение **Gymbar** ещё не заведено в App Store Connect.
-API Apple не умеет создавать app record. Нужно: ASC → My Apps → **+** → New App →
-platform iOS, bundle `com.vugarhasanov.gymtracker`, name **Gymbar**, primary language English,
-SKU любой (напр. `gymbar-001`). После этого сказать мне — я вытяну `ascAppId`, впишу в
-`mobile/eas.json` и залью build #7 в TestFlight одной командой.
-
-Дальше по очереди: скриншоты 6.9″ (могу снять в симуляторе), анкета App Privacy
-(«Data Not Collected», только в UI), отправка на ревью.
-
-## Старое next step
-
-Всё закоммичено и запушено в `main`, рабочее дерево чистое. Приложение
-функционально закрыто: экраны, флоу, темы, три языка, экспорт, онбординг,
-звук, тактильность. **Ассеты иконки собраны и лежат в `mobile/assets/images/`** —
-дефолтных картинок Expo больше нет.
-
-Дальше по приоритету:
-1. **Публикация в App Store** — нужен Apple Developer аккаунт, EAS-сборка, скриншоты.
-2. Splash живьём (на нативной сборке) не проверялся — PNG на месте, но
-   `expo prebuild`/`run:ios` после замены ассетов не гонялся.
-3. Нативный share-sheet экспорта живьём не проверялся — только веб-скачивание.
+Дождаться, когда сборка пройдёт обработку у Apple и появится в TestFlight
+(слежение через `/v1/builds?filter[app]=6793901080`, поле `processingState=VALID`).
+Дальше — руками Вугара в UI ASC, API этого не даёт:
+1. Загрузить скриншоты из `docs/appstore/screenshots/` (iPhone 6.9", порядок по номерам)
+2. Вставить тексты из `docs/appstore/metadata.md` + оба URL сайта поддержки
+3. Анкета App Privacy → **Data Not Collected**
+4. Выбрать сборку и отправить на ревью
 
 ## Done (recent first, max 10)
+
+- 2026-07-23 — **Gymbar заведён в ASC** (app id `6793901080`) в обход сломанной формы:
+  выпадашка Bundle ID в New App была пуста, причину вытащил из внутреннего API —
+  старый bundle id числился занятым. Новый `com.gymbar.app` зарегистрирован через
+  ASC API, профиль подписи выпущен туда же, `ascAppId` в `eas.json` (`86c2a5d`)
+
+- 2026-07-23 — **Скриншоты 6.9″ сняты** (`docs/appstore/screenshots/`, 6 шт, 1320×2868,
+  статус-бар 9:41 через `simctl status_bar override`). Заодно найден и починен
+  `en.common.done` — на английском кнопка в итогах выводила «ГОТОВО» (`d7af326`)
+
+- 2026-07-23 — Репозиторий переименован `Gym-Tracker` → `gymbar`, сайт переехал на
+  https://hasanovvug-gif.github.io/gymbar/ (`0766acd`)
 
 - 2026-07-23 — **Сайт поддержки живой:** https://hasanovvug-gif.github.io/gymbar/ и
   `/privacy.html`. Исходники `site/*.html` в `main`, публикация с ветки `gh-pages`.
@@ -61,39 +60,34 @@ SKU любой (напр. `gymbar-001`). После этого сказать м
 - 2026-07-22 — 4 концепта иконки показаны Вугару, выбор отложен. SVG + разбор
   сохранены в `design/icon-concepts/`, чтобы новая сессия не перерисовывала
 
-- 2026-07-22 — Звук вместо голоса в rest-таймере (`expo-audio` + сгенерированный
-  трёхтоновый `rest-done.wav`, играет на беззвучном) + сплошная тактильность:
-  примитив `Tappable` (press-scale + haptics), анимация тоггла/таб-точки,
-  переходы, `LinearTransition` на карточках. Проверено в браузере (`f14195b`)
-
-- 2026-07-22 — Body-шрифт Archivo → **Manrope** (кириллица), Oswald-заголовки без изменений.
-  Проверено в браузере: `fontFamily: Manrope_*`, все веса loaded. Запушено (`87c1eb9`)
-
-- 2026-07-22 — Онбординг: 4 экрана про неочевидное, свайп + кнопки, повтор из настроек.
-  Codex Sol; пейджер переписан мной на Animated+PanResponder (индикатор опережал контент)
-- 2026-07-22 — Сид-данные переводятся (`nameKey` + сброс ключа при ручной правке),
-  бэкфилл ключей для уже сохранённого состояния, фикс переноса таб-бара на UA. Codex Sol
-
-- 2026-07-22 — Переводы UA/EN: словари `i18n/{ru,ua,en}.ts`, `useT()` без библиотек,
-  локали в `format.ts`, плюрализация по языку. Codex Terra в два захода, добито мной
-- 2026-07-22 — Экспорт данных: JSON-конверт → `expo-file-system` 19 + `expo-sharing` →
-  системный share-sheet, на вебе — скачивание. Codex Luna
-- 2026-07-22 — Светлая тема: 25 токенов, `useTheme()` из стора, ноль хардкод-цветов. Codex Sol
-- 2026-07-22 — `feat/mobile-expo-app` влита в `main` и запушена (`694d48b`, merge --no-ff)
-- 2026-07-22 — Апгрейд Expo SDK 53 → 54, нативная сборка iOS проходит (`276d696`)
-- 2026-07-22 — Полная реализация всех экранов и логики, сделана Codex Sol, верифицирована (`df76b0b`)
-- 2026-07-22 — Скаффолд Expo + дизайн-система (цвета, Oswald/Archivo) + 5-табная навигация
-- 2026-07-22 — Заведён `docs/state/`, кампания перенесена из чата в файл
+> Более ранние записи — `archive/gym-tracker-mobile-2026-07-23.md`
 
 ## TODO (priority)
 
+- [ ] Дождаться сборки в TestFlight и поставить на телефон
+- [ ] Заполнить карточку в UI ASC: скриншоты, тексты, URL, App Privacy → отправка на ревью
 - [ ] Оценить вживую тембр бипа и частоту вибрации на реальном телефоне
 - [ ] Нативный share-sheet экспорта не проверен вживую — только веб-скачивание
 - [ ] Drag-and-drop reorder в редакторе плана — сейчас кнопки ↑↓
 - [ ] Проверить splash на нативной сборке (`expo prebuild` + `run:ios`) после замены ассетов
-- [ ] Публикация в App Store
 
 ## Decisions (non-obvious, durable)
+
+- 2026-07-23: bundle id **`com.gymbar.app`**, старый `com.vugarhasanov.gymtracker`
+  сожжён навсегда. Он числится занятым в App Store (скорее всего под вторым Apple ID
+  Вугара — `kutum.az@` vs `hasanov.vug@`), а bundle id уникален глобально и **не
+  освобождается даже после удаления приложения**. Симптом был обманчивый: выпадашка
+  Bundle ID в форме New App просто пустая, без объяснения. Настоящую причину даёт
+  только внутренний API — `POST /iris/v1/apps` отвечает `ENTITY_ERROR.ATTRIBUTE.
+  INVALID.DUPLICATE`. Если снова пусто в выпадашке — сразу дёргать API, не искать
+  проблему в аккаунте.
+
+- 2026-07-23: **запись приложения в ASC создаётся через `POST /iris/v1/apps`** из
+  залогиненной сессии браузера (публичный `/v1/apps` этого не умеет). Тело: атрибуты
+  `bundleId/primaryLocale/sku` + обязательные relationships `appInfos` и
+  `appStoreVersions`, оба через `included` с плейсхолдерами `${new-...}`; имя лежит
+  в `appInfoLocalizations`, не в атрибутах app. Bundle id и профиль подписи при этом
+  заводятся обычным публичным API по ключу `.p8` — Xcode не нужен.
 
 - 2026-07-23: иконка Gym Tracker строится по **грамматике иконки AsbestosGuard**, а не
   сама по себе: тёмный фирменный фон + белая внешняя форма контуром + один акцентный
@@ -140,6 +134,10 @@ SKU любой (напр. `gymbar-001`). После этого сказать м
 - **Инструкция handoff-бандла:** `design/claude-design-export/README.md`
 - **Инструкции агентам:** `AGENTS.md` (корень), `mobile/AGENTS.md` (пин на докИ Expo v54)
 - **Репозиторий:** https://github.com/hasanovvug-gif/gymbar
+- **App Store Connect:** app id `6793901080` · bundle `com.gymbar.app` · SKU `gymbar-001`
+- **Карточка и скриншоты:** `docs/appstore/metadata.md`, `docs/appstore/screenshots/`
+- **Сайт поддержки:** https://hasanovvug-gif.github.io/gymbar/ (ветка `gh-pages`, исходники `site/`)
+- **Подпись:** `~/.appstoreconnect/private/gymbar/` (профиль + p12), ключ API `AuthKey_XC65QPNJJK.p8`
 - **Knowledge:** `~/Documents/Projects/mission-control/knowledge/projects/gym-tracker.md`
 - **Исходная задача по дизайну:** `~/Documents/Projects/mission-control/tasks/personal/gymtracker-design.md`
 
@@ -147,6 +145,7 @@ SKU любой (напр. `gymbar-001`). После этого сказать м
 
 - Branch: `main`, рабочее дерево чистое, синхронно с origin
 - Worktree: `~/Documents/Projects/Gym-Tracker`
-- Last meaningful commit: `a9891f1` — собраны ассеты иконки (запушен)
-- Приложение: `mobile/`, bundle id `com.vugarhasanov.gymtracker`
+- Last meaningful commit: `d7af326` — фикс `en.common.done` + скриншоты (запушен)
+- Приложение: `mobile/`, bundle id `com.gymbar.app`
 - Запуск: `cd mobile && npx expo start` · симулятор — `npx expo run:ios`
+- На телефон без TestFlight: `npx expo start --lan` → Expo Go → Enter URL manually
