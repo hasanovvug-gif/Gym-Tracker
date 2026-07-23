@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gymbar — Support</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600&family=Manrope:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0B0C0E; --card:#141619; --line:#23262B; --ink:#F2F4F5; --mut:#8B9199; --accent:#C8F031; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:Manrope,system-ui,sans-serif; line-height:1.6; }
+  .wrap { max-width:720px; margin:0 auto; padding:64px 24px 96px; }
+  h1,h2 { font-family:Oswald,sans-serif; font-weight:600; letter-spacing:.02em; text-transform:uppercase; margin:0 0 12px; }
+  h1 { font-size:clamp(32px,7vw,48px); }
+  h2 { font-size:20px; margin-top:40px; }
+  p { margin:0 0 16px; color:var(--mut); }
+  p.lead { color:var(--ink); font-size:18px; }
+  a { color:var(--accent); }
+  .mark { width:64px; height:64px; margin-bottom:24px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 24px; margin:24px 0; }
+  .card p:last-child { margin-bottom:0; }
+  ul { color:var(--mut); padding-left:20px; margin:0 0 16px; }
+  li { margin-bottom:6px; }
+  footer { margin-top:56px; padding-top:24px; border-top:1px solid var(--line); color:var(--mut); font-size:14px; }
+  .nav { display:flex; gap:20px; margin-bottom:40px; font-size:14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <svg class="mark" viewBox="0 0 120 120" fill="none" aria-hidden="true">
+    <rect width="120" height="120" rx="26" fill="#0B0C0E"/>
+    <path d="M60 20 L100 60 L60 100 L20 60 Z" stroke="#F2F4F5" stroke-width="11" stroke-linejoin="round"/>
+    <path d="M38 60 H82" stroke="#C8F031" stroke-width="11" stroke-linecap="round"/>
+  </svg>
+
+  <h1>Gymbar</h1>
+  <p class="lead">A workout log built for one thing: getting through the session without touching your phone more than you have to.</p>
+
+  <div class="nav"><a href="#support">Support</a><a href="privacy.html">Privacy Policy</a></div>
+
+  <h2 id="support">Support</h2>
+  <p>Questions, bugs, or feature requests — email <a href="mailto:kutum.az@gmail.com">kutum.az@gmail.com</a>. Replies usually come within a couple of days.</p>
+
+  <div class="card">
+    <p><strong>Where is my data?</strong></p>
+    <p>Everything lives on your device only. There is no account and no server. Deleting the app deletes the data — export it first from Settings → Export data if you want to keep it.</p>
+  </div>
+
+  <div class="card">
+    <p><strong>How do I move data to a new phone?</strong></p>
+    <p>Settings → Export data writes a JSON file you can share to yourself. Import it on the new device from the same screen.</p>
+  </div>
+
+  <div class="card">
+    <p><strong>The rest timer sound doesn't play.</strong></p>
+    <p>The cue is designed to play even on silent mode. If it stays quiet, check that Gymbar is allowed to play audio and that the media volume is not at zero.</p>
+  </div>
+
+  <h2>What the app does</h2>
+  <ul>
+    <li>Plan your split as an ordered list of days — no weekday lock-in.</li>
+    <li>Rest timer between sets with a sound cue.</li>
+    <li>Pause at any moment — paused time is excluded from active time.</li>
+    <li>Skip an exercise (no volume counted) or end it early (sets you did still count).</li>
+    <li>Supplement checklist by time of day, with stock levels and an adherence streak.</li>
+    <li>History and JSON export. Dark and light themes. English, Russian, Ukrainian.</li>
+  </ul>
+
+  <footer>
+    Gymbar · <a href="privacy.html">Privacy Policy</a> · <a href="https://github.com/hasanovvug-gif/Gym-Tracker">Source</a>
+  </footer>
+</div>
+</body>
+</html>
