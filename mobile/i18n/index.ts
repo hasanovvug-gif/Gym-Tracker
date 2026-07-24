@@ -5,13 +5,20 @@ import { en } from './en';
 import { ru } from './ru';
 import { ua } from './ua';
 import './uaImportTranslations';
+import './icloudTranslations';
 
-export type Dict = typeof ru;
+export type Dict = Omit<typeof ru, 'settings'> & {
+  settings: typeof ru.settings & {
+    icloudSynced: string;
+    icloudUnavailable: string;
+    icloudNever: string;
+  };
+};
 type Section = keyof Dict;
 export type TranslationKey = { [S in Section]: `${S}.${Extract<keyof Dict[S], string>}` }[Section];
 type Params = Record<string, string | number>;
 export type AppLanguage = 'RU' | 'UA' | 'EN';
-const dictionaries: Record<AppLanguage, Dict> = { RU: ru, UA: ua as Dict, EN: en };
+const dictionaries: Record<AppLanguage, Dict> = { RU: ru as Dict, UA: ua as Dict, EN: en as Dict };
 
 export function translate(language: AppLanguage, key: TranslationKey, params: Params = {}) {
   const [section, item] = key.split('.') as [Section, string];

@@ -7,6 +7,7 @@ import { useTheme } from '@/hooks/useTheme';
 import { useGymStore } from '@/store/useGymStore';
 import { exportGymData } from '@/utils/exportData';
 import { importGymData } from '@/utils/importData';
+import { useICloudStatus } from '@/utils/icloudConfig';
 import { useT } from '@/i18n';
 
 function useThemedStyles() {
@@ -21,6 +22,14 @@ export default function SettingsScreen() {
   const settings = useGymStore((state) => state.settings);
   const { setLanguage, setTheme, setPreSignalSeconds, setOnboardingSeen, toggleNotification, resetAll } = useGymStore();
   const { t, language } = useT();
+  const iCloud = useICloudStatus();
+  const iCloudLabel = !iCloud.available
+    ? t('settings.icloudUnavailable')
+    : iCloud.lastSyncedAt
+      ? t('settings.icloudSynced', {
+          time: new Date(iCloud.lastSyncedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        })
+      : t('settings.icloudNever');
 
   const confirmReset = () => {
     const message = t('settings.resetMessage');
@@ -109,6 +118,9 @@ export default function SettingsScreen() {
         <Tappable onPress={() => importGymData(language)} style={[styles.actionRow, styles.rowBorder]}>
           <Text style={styles.actionText}>{t('settings.import')}</Text><Text style={styles.chevron}>›</Text>
         </Tappable>
+        <View style={[styles.icloudStatus, styles.rowBorder]}>
+          <Text style={styles.icloudText}>{iCloudLabel}</Text>
+        </View>
         <Tappable onPress={() => setOnboardingSeen(false)} style={[styles.actionRow, styles.rowBorder]}>
           <Text style={styles.actionText}>{t('settings.showOnboarding')}</Text><Text style={styles.chevron}>›</Text>
         </Tappable>
@@ -159,5 +171,7 @@ const createStyles = (c: Palette) => StyleSheet.create({
   settingSubtitle: { color: c.textSecondary, fontFamily: fonts.body, fontSize: 11, marginTop: 3 },
   actionRow: { minHeight: 58, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   actionText: { color: c.textPrimary, fontFamily: fonts.bodySemiBold, fontSize: 14 },
+  icloudStatus: { minHeight: 38, justifyContent: 'center' },
+  icloudText: { color: c.textMuted, fontFamily: fonts.body, fontSize: 11 },
   chevron: { color: c.textMuted, fontFamily: fonts.body, fontSize: 20 },
 });

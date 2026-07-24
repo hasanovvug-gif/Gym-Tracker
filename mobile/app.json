@@ -15,7 +15,8 @@
       "entitlements": {
         "com.apple.security.application-groups": [
           "group.com.gymbar.app"
-        ]
+        ],
+        "com.apple.developer.ubiquity-kvstore-identifier": "$(TeamIdentifierPrefix)com.gymbar.app"
       },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,

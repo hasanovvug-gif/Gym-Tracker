@@ -17,6 +17,7 @@ import 'react-native-reanimated';
 import { Palette } from '@/constants/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useGymStore } from '@/store/useGymStore';
+import { initializeICloudConfig } from '@/utils/icloudConfig';
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -57,6 +58,10 @@ export default function RootLayout() {
   useEffect(() => {
     if (isReady) SplashScreen.hide();
   }, [isReady]);
+
+  useEffect(() => {
+    if (hasHydrated) initializeICloudConfig();
+  }, [hasHydrated]);
 
   if (!isReady) {
     return null;
