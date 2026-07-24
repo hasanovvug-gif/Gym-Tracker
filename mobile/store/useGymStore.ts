@@ -11,18 +11,11 @@ import {
   WorkoutDay,
   WorkoutSession,
 } from '@/types/workout';
+import { initialSettings, normalizeGymData, Settings } from '@/utils/gymDataSchema';
 
-type Language = 'RU' | 'UA' | 'EN';
-type ThemeChoice = 'light' | 'dark';
 type NotificationKey = 'workout' | 'supplements' | 'sound';
-
-type Settings = {
-  language: Language;
-  theme: ThemeChoice;
-  onboardingSeen: boolean;
-  preSignalSeconds: number;
-  notifications: Record<NotificationKey, boolean>;
-};
+type Language = Settings['language'];
+type ThemeChoice = Settings['theme'];
 
 type GymState = {
   workoutDays: WorkoutDay[];
@@ -66,7 +59,7 @@ type GymState = {
   resetAll: () => void;
 };
 
-type PersistedGymState = Pick<GymState,
+export type PersistedGymState = Pick<GymState,
   'workoutDays' | 'history' | 'activeSession' | 'recentSessionId' | 'supplements' | 'supplementLogs' | 'settings'
 >;
 
@@ -92,14 +85,6 @@ function nextExerciseIndex(session: ActiveWorkoutSession, from: number) {
   }
   return from;
 }
-
-const initialSettings: Settings = {
-  language: 'RU',
-  theme: 'dark',
-  onboardingSeen: false,
-  preSignalSeconds: 15,
-  notifications: { workout: true, supplements: true, sound: true },
-};
 
 export const useGymStore = create<GymState>()((set, get) => ({
       workoutDays: clone(INITIAL_WORKOUT_DAYS),
@@ -570,16 +555,18 @@ void AsyncStorage.getItem(STORAGE_KEY)
       ?? (parsed as Partial<PersistedGymState>);
     if (!savedRaw) return;
     const saved = backfillSeedKeys(savedRaw);
+    const normalized = normalizeGymData({
+      workoutDays: saved.workoutDays ?? [],
+      history: saved.history ?? [],
+      supplements: saved.supplements ?? [],
+      supplementLogs: saved.supplementLogs ?? [],
+      settings: saved.settings ?? {},
+    });
     useGymStore.setState({
       ...saved,
-      settings: {
-        ...initialSettings,
-        ...saved.settings,
-        preSignalSeconds: saved.settings?.preSignalSeconds ?? initialSettings.preSignalSeconds,
-        notifications: { ...initialSettings.notifications, ...saved.settings?.notifications },
-      },
-      supplements: saved.supplements?.map((supplement) => ({ ...supplement, unitsPerDose: supplement.unitsPerDose ?? 1 })),
-      history: saved.history?.map((session) => ({ ...session, pauseRecords: session.pauseRecords ?? [] })),
+      settings: normalized.settings,
+      supplements: normalized.supplements,
+      history: normalized.history,
     });
   })
   .catch(() => undefined)

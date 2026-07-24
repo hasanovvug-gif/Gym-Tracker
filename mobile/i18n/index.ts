@@ -4,13 +4,14 @@ import { ReasonTag } from '@/types/workout';
 import { en } from './en';
 import { ru } from './ru';
 import { ua } from './ua';
+import './uaImportTranslations';
 
 export type Dict = typeof ru;
 type Section = keyof Dict;
 export type TranslationKey = { [S in Section]: `${S}.${Extract<keyof Dict[S], string>}` }[Section];
 type Params = Record<string, string | number>;
 export type AppLanguage = 'RU' | 'UA' | 'EN';
-const dictionaries: Record<AppLanguage, Dict> = { RU: ru, UA: ua, EN: en };
+const dictionaries: Record<AppLanguage, Dict> = { RU: ru, UA: ua as Dict, EN: en };
 
 export function translate(language: AppLanguage, key: TranslationKey, params: Params = {}) {
   const [section, item] = key.split('.') as [Section, string];

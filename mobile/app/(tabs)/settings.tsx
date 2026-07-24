@@ -6,6 +6,7 @@ import { fonts, Palette } from '@/constants/theme';
 import { useTheme } from '@/hooks/useTheme';
 import { useGymStore } from '@/store/useGymStore';
 import { exportGymData } from '@/utils/exportData';
+import { importGymData } from '@/utils/importData';
 import { useT } from '@/i18n';
 
 function useThemedStyles() {
@@ -104,6 +105,9 @@ export default function SettingsScreen() {
       <Card style={styles.groupCard}>
         <Tappable onPress={() => exportGymData(language)} style={[styles.actionRow, styles.rowBorder]}>
           <Text style={styles.actionText}>{t('settings.export')}</Text><Text style={styles.chevron}>›</Text>
+        </Tappable>
+        <Tappable onPress={() => importGymData(language)} style={[styles.actionRow, styles.rowBorder]}>
+          <Text style={styles.actionText}>{t('settings.import')}</Text><Text style={styles.chevron}>›</Text>
         </Tappable>
         <Tappable onPress={() => setOnboardingSeen(false)} style={[styles.actionRow, styles.rowBorder]}>
           <Text style={styles.actionText}>{t('settings.showOnboarding')}</Text><Text style={styles.chevron}>›</Text>
