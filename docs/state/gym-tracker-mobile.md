@@ -2,14 +2,15 @@
 campaign: gym-tracker-mobile
 status: active
 started: 2026-07-22
-updated: 2026-07-24 18:20
+updated: 2026-07-24 18:40
 ---
 
 # Gym Tracker → Expo/React Native
 
 ## Где сейчас
 
-**Фаза 1 (двухступенчатый звук) РЕАЛИЗОВАНА Codex Sol, проверена и запушена (`e4b776b`) — ждёт device-теста.**
+**Фаза 1 (двухступенчатый звук) ЗАКРЫТА — Вугар подтвердил «всё ок», запушено `e4b776b`.**
+Следующая работа — **Фаза 2 (сохранность), стартует В НОВОЙ СЕССИИ** (Вугар начнёт сам).
 17 файлов: скрипт-генератор `rest-done.wav` (громче) + новый `rest-soon.wav`, настройка `preSignalSeconds`
 (дефолт 15, сегменты Выкл/10/15/20), JS-планировщик двух уведомлений (`kind: rest_soon|rest_done`),
 foreground-антиэхо в `setNotificationHandler`, нативный App Intent планирует ОБА сигнала на locked,
@@ -29,12 +30,11 @@ JS через expo-audio (как уже работал финал), locked/backg
 
 ## Next step
 
-1. [ ] **Device-тест Фазы 1** на реальном iPhone (звук/вибрация/locked; `+30`, pause/resume, ранний endRest,
-   повторный App Intent — без задвоения). Требует пересборки бинарника (custom sounds — не OTA):
-   `cd mobile && LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 npx expo run:ios --device` в ТЕРМИНАЛЕ ВУГАРА.
-   Оценить вживую тембр бипов (владелец правит тона в `scripts/gen-sounds.mjs`). После ОК — ship + Фаза 2.
-2. [ ] **Фаза 2 — сохранность** (§3): безопасный экспорт/импорт (iCloud Drive) + iCloud KV native-модуль.
-3. [ ] **(Фон) Дождаться одобрения 1.0** (build #2, `WAITING_FOR_REVIEW`); после релиза → версия **1.0.1**
+1. [ ] **Фаза 2 — сохранность** (спека §3, §7 п.2) — **НАЧАТЬ В НОВОЙ СЕССИИ**: безопасный экспорт/импорт
+   истории (iCloud Drive, `expo-document-picker` + строгая валидация/бэкап перед заменой) + iCloud KV
+   native-модуль для конфига (по образцу gymbar-live-activity, `NSUbiquitousKeyValueStore`). Порядок фаз
+   дальше: §4 Cloudflare Worker → §2 AI-ввод добавок → §3.3 AI-анализ.
+2. [ ] **(Фон) Дождаться одобрения 1.0** (build #2, `WAITING_FOR_REVIEW`); после релиза → версия **1.0.1**
    с build #6 (Live Activity, уже VALID в ASC), экспортный комплаенс → на ревью (`asc.py` / UI ASC).
 
 > **Решение Вугара (24.07):** build #2 (без Live Activity) идёт как 1.0 — не трогаем текущее ревью.
@@ -48,7 +48,7 @@ JS через expo-audio (как уже работал финал), locked/backg
   17 файлов. Верификация (delegated-verification): `tsc`=0 сам, WAV оба валидны, spot-read планировщика
   (`utils/liveActivity.ts`), Swift App Intent (оба сигнала, App-Group ключ `gymbar.preSignalSeconds` согласован),
   once-guard в `workout-session.tsx`, миграция стора; web-UI сегмента снят — переключение живое. Убрал
-  Codex-артефакт `mobile/output/`. **Запушено `e4b776b` в main (lint чистый), ждёт device-теста.**
+  Codex-артефакт `mobile/output/`. **Запушено `e4b776b`; Вугар подтвердил «всё ок» — Фаза 1 закрыта.**
 
 - 2026-07-24 — **Спека новых фич v2 написана и проревьюена Codex Sol** (`e049d2d`). Брейншторм по 3 фичам
   (звук, AI-добавки, iCloud) → спека → ревью Sol/high: поймал 2 фактические ошибки (финал отдыха =
@@ -111,7 +111,7 @@ JS через expo-audio (как уже работал финал), locked/backg
 
 ## TODO (priority)
 
-- [ ] **Фаза 1 — двухступенчатый звук** (спека §1): единый планировщик 2 уведомлений + нативная ветка App Intent + foreground fallback
+- [x] **Фаза 1 — двухступенчатый звук** (спека §1) — сделано, принято Вугаром (`e4b776b`)
 - [ ] **Фаза 2 — сохранность** (§3): iCloud KV конфиг (native-модуль) + безопасный экспорт/импорт истории
 - [ ] **Фаза 3 — Cloudflare Worker** (§4): прокси + spend cap + лимиты
 - [ ] **Фаза 4 — AI-ввод добавок** (§2): image-picker, предпросмотр, контракт Gemini, агрегированные напоминания
