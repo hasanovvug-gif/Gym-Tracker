@@ -2,15 +2,21 @@
 campaign: gym-tracker-mobile
 status: active
 started: 2026-07-22
-updated: 2026-07-24 18:40
+updated: 2026-07-24 21:10
 ---
 
 # Gym Tracker → Expo/React Native
 
 ## Где сейчас
 
-**Фаза 1 (двухступенчатый звук) ЗАКРЫТА — Вугар подтвердил «всё ок», запушено `e4b776b`.**
-Следующая работа — **Фаза 2 (сохранность), стартует В НОВОЙ СЕССИИ** (Вугар начнёт сам).
+**Фаза 2 (сохранность) реализована и запушена (`b366b6d`, `e7f302c`, `80001af`) — ждёт device-теста.**
+Импорт истории с валидацией/бэкапом + iCloud KV для конфига (настройки + добавки + **план тренировок** —
+решение Вугара, шире спеки). Инфра подписи готова: iCloud включён на App ID, профиль перевыпущен
+(в нём `ubiquity-kvstore-identifier` = `K6M569DX9E.*`). Верификация: `tsc`=0, lint чисто, 18/18 runtime-тестов
+валидатора (round-trip реального экспорта + 10 битых файлов → отказ без порчи данных), web-UI снят.
+**Осталось: собрать и проверить на телефоне** (iCloud KV и document-picker в вебе не проверяются).
+
+Фаза 1 (двухступенчатый звук) закрыта Вугаром, `e4b776b`.
 17 файлов: скрипт-генератор `rest-done.wav` (громче) + новый `rest-soon.wav`, настройка `preSignalSeconds`
 (дефолт 15, сегменты Выкл/10/15/20), JS-планировщик двух уведомлений (`kind: rest_soon|rest_done`),
 foreground-антиэхо в `setNotificationHandler`, нативный App Intent планирует ОБА сигнала на locked,
@@ -30,10 +36,10 @@ JS через expo-audio (как уже работал финал), locked/backg
 
 ## Next step
 
-1. [ ] **Фаза 2 — сохранность** (спека §3, §7 п.2) — **НАЧАТЬ В НОВОЙ СЕССИИ**: безопасный экспорт/импорт
-   истории (iCloud Drive, `expo-document-picker` + строгая валидация/бэкап перед заменой) + iCloud KV
-   native-модуль для конфига (по образцу gymbar-live-activity, `NSUbiquitousKeyValueStore`). Порядок фаз
-   дальше: §4 Cloudflare Worker → §2 AI-ввод добавок → §3.3 AI-анализ.
+1. [ ] **Device-тест Фазы 2** — нужен новый билд (две новые нативные зависимости: `expo-document-picker`,
+   модуль `gymbar-icloud-kv`). Проверить: импорт файла из iCloud Drive, переустановка → настройки/добавки/
+   план вернулись сами, строка статуса «iCloud: синхронизировано». Дальше по спеке: §4 Cloudflare Worker →
+   §2 AI-ввод добавок → §3.3 AI-анализ.
 2. [ ] **(Фон) Дождаться одобрения 1.0** (build #2, `WAITING_FOR_REVIEW`); после релиза → версия **1.0.1**
    с build #6 (Live Activity, уже VALID в ASC), экспортный комплаенс → на ревью (`asc.py` / UI ASC).
 
@@ -41,6 +47,17 @@ JS через expo-audio (как уже работал финал), locked/backg
 > Live Activity (build #6) уедет апдейтом 1.0.1 (влита в `main` `95b79a7`, проверена в TestFlight).
 
 ## Done (recent first, max 10)
+
+- 2026-07-24 — **Фаза 2 (сохранность) реализована Codex Sol (Sol/high, фон) и проверена мной.**
+  Бриф `/tmp/codex-gym-phase2-durability.md`. Часть A: `utils/importData.ts` + общий валидатор
+  `utils/gymDataSchema.ts` (whitelist полей, строгие type-guards, отказ целиком при любом битом элементе,
+  preview, авто-бэкап в AsyncStorage `gym-tracker-mobile-backup-<ts>` с ротацией до 3, атомарный setState,
+  сброс scheduled-уведомлений). Часть B: native-модуль `modules/gymbar-icloud-kv/` поверх
+  `NSUbiquitousKeyValueStore` + `utils/icloudConfig.ts` (одним блобом, `schemaVersion`+`updatedAt`, LWW,
+  дебаунс 3 с, анти-эхо, pull по init/`didChangeExternally`/AppState-active) + строка статуса в Настройках.
+  Валидатор переиспользован в гидрации стора. Я: свёл i18n обратно в ru/en/ua (Codex наплодил два файла
+  с `Object.assign` + подпорки в типах), прогнал 18 runtime-тестов валидатора на скомпилированном коде,
+  включил iCloud на App ID и перевыпустил профиль. Запушено `b366b6d`, `e7f302c`, `80001af`.
 
 - 2026-07-24 — **Фаза 1 (двухступенчатый звук) реализована Codex Sol (Sol/high, фон) и проверена мной.**
   Бриф `/tmp/codex-gym-phase1-sound.md` (архитектура: foreground=JS+expo-audio, locked=2 уведомления,
@@ -112,7 +129,8 @@ JS через expo-audio (как уже работал финал), locked/backg
 ## TODO (priority)
 
 - [x] **Фаза 1 — двухступенчатый звук** (спека §1) — сделано, принято Вугаром (`e4b776b`)
-- [ ] **Фаза 2 — сохранность** (§3): iCloud KV конфиг (native-модуль) + безопасный экспорт/импорт истории
+- [x] **Фаза 2 — сохранность** (§3): iCloud KV конфиг (native-модуль) + безопасный импорт истории — код готов,
+      ждёт device-теста
 - [ ] **Фаза 3 — Cloudflare Worker** (§4): прокси + spend cap + лимиты
 - [ ] **Фаза 4 — AI-ввод добавок** (§2): image-picker, предпросмотр, контракт Gemini, агрегированные напоминания
 - [ ] **Фаза 5 (позже) — AI-анализ** (§3.3)
@@ -124,6 +142,17 @@ JS через expo-audio (как уже работал финал), locked/backg
 - [ ] Проверить splash на нативной сборке (`expo prebuild` + `run:ios`) после замены ассетов
 
 ## Decisions (non-obvious, durable)
+
+- 2026-07-24: **iCloud KV — один блоб, а не ключ-на-поле.** Конфиг (`settings` + `supplements` + `workoutDays`)
+  лежит под единственным ключом `gymbar.config.v1` как `{schemaVersion, updatedAt, ...}`; конфликт решается
+  last-write-wins по `updatedAt`. Так **не нужны tombstones** на удаление (удалённая добавка исчезает вместе
+  с перезаписью всего блоба) — блоб 6.2 КБ при лимите Apple 1 МБ, запас 150×. История и логи приёма в KV
+  не кладутся никогда, только файлом. План тренировок включён в синк по решению Вугара (шире спеки §3.2).
+- 2026-07-24: **включение iCloud-capability на App ID снова делает профили INVALID** — тот же капкан, что с
+  App Groups + Push. Порядок: `python3 asc.py icloud-on` (новая команда) → `create-main` → проверить
+  `security cms -D -i gymbar.mobileprovision | plutil -extract Entitlements xml1 -o - -`: должен появиться
+  `com.apple.developer.ubiquity-kvstore-identifier` = `K6M569DX9E.*` (wildcard покрывает
+  `$(TeamIdentifierPrefix)com.gymbar.app` из app.json). Виджет iCloud не нужен — его профиль не трогаем.
 
 - 2026-07-24: **EAS local-креды для мульти-таргет приложения (app + widget extension).**
   (1) `mobile/credentials.json` ключуется **именем Xcode-таргета** (`Gymbar`, `GymbarLiveActivity`),
@@ -239,8 +268,11 @@ JS через expo-audio (как уже работал финал), locked/backg
 
 - Branch: **`main`**, дерево чистое, всё запушено. Ветка `feat/live-activity` слита и удалена.
 - Worktree: `~/Documents/Projects/Gym-Tracker`
-- Last commit: `e4b776b` (Фаза 1 — двухступенчатый звук). Бриф Codex: `/tmp/codex-gym-phase1-sound.md`.
-  Ключевое ранее: спека v2 `e049d2d`, merge LA `95b79a7`, time-aware кнопка `6f81653`
+- Last commit: `80001af` (Фаза 2 — сохранность). Брифы Codex: `/tmp/codex-gym-phase2-durability.md`,
+  ранее `/tmp/codex-gym-phase1-sound.md`. Ключевое ранее: звук `e4b776b`, спека v2 `e049d2d`,
+  merge LA `95b79a7`, time-aware кнопка `6f81653`
+- **Билд после Фазы 2 обязателен** — добавились нативные `expo-document-picker` и модуль `gymbar-icloud-kv`;
+  OTA-апдейтом это не приедет
 - Приложение: `mobile/`, bundle id `com.gymbar.app`, Team ID `K6M569DX9E`
 - **EAS App Store сборка (мульти-таргет):** `credentialsSource: local`, `credentials.json` ключуется
   ИМЕНЕМ таргета (`Gymbar`/`GymbarLiveActivity`). Профили + скрипт перевыпуска — в
