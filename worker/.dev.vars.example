@@ -1,0 +1,4 @@
+# Локальная разработка: скопировать в .dev.vars (в git не попадает).
+# В проде эти два значения кладутся секретами: wrangler secret put GEMINI_API_KEY / APP_TOKEN
+GEMINI_API_KEY="your-gemini-key"
+APP_TOKEN="long-random-string"
