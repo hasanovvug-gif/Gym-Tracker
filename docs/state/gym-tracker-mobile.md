@@ -35,9 +35,16 @@ Apple Developer, provisioning-профили созданы (automatic signing).
 
 > **Решение Вугара (24.07):** build #2 (без Live Activity) идёт как 1.0 — не трогаем текущее ревью,
 > релиз выйдет раньше. Live Activity (build #6) уедет отдельным апдейтом 1.0.1.
-> Live Activity влита в `main` (merge `95b79a7`), собрана и загружена в ASC (build #6, VALID).
+> Live Activity влита в `main` (merge `95b79a7`), собрана, загружена в ASC (build #6, VALID) и
+> **проверена в TestFlight на iPhone Вугара** — time-aware кнопка работает.
 
 ## Done (recent first, max 10)
+
+- 2026-07-24 — **build #6 с Live Activity в TestFlight, проверен на iPhone.** Загружен в ASC (VALID,
+  `READY_FOR_BETA_TESTING`), комплаенс автоочищен через `ITSAppUsesNonExemptEncryption:false` в
+  Info.plist. Не отображался у тестера — не был привязан к группе; привязал build к «Internal Testers»
+  (`000fea70…`) через `POST /v1/betaGroups/{id}/relationships/builds` (`asc.py tf-attach`). Вугар
+  установил, time-aware кнопка работает. build #6 остаётся кандидатом на версию 1.0.1
 
 - 2026-07-24 — **EAS build с Live Activity собран.** Виджет — отдельный app extension
   (`com.gymbar.app.liveactivity`), для App Store сборки нужны СВОИ креды. Три падения подряд, все
@@ -90,27 +97,6 @@ Apple Developer, provisioning-профили созданы (automatic signing).
 
 - 2026-07-23 — Репозиторий переименован `Gym-Tracker` → `gymbar`, сайт переехал на
   https://hasanovvug-gif.github.io/gymbar/ (`0766acd`)
-
-- 2026-07-23 — **Сайт поддержки живой:** https://hasanovvug-gif.github.io/gymbar/ и
-  `/privacy.html`. Исходники `site/*.html` в `main`, публикация с ветки `gh-pages`.
-  Оба URL отвечают 200 — можно вписывать в ASC
-- 2026-07-23 — **iOS build #7 собран успешно** (`bcaef92`, IPA готов в EAS). Сборки 4–5
-  падали на `npm ci`; починено пересборкой lockfile и пином Node 24
-- 2026-07-23 — Карточка App Store на трёх языках: `docs/appstore/metadata.md`
-  (имя **Gymbar**, subtitle, keywords, описания RU/UA/EN)
-
-- 2026-07-23 — **Ассеты иконки собраны** (`a9891f1`): `icon.png` 1024 (фон `#0B0C0E`),
-  `adaptive-icon.png` (прозрачный передний слой, арт ужат до 66 % — safe zone Android),
-  `splash-icon.png` 512 прозрачный, `favicon.png` 196. Скрипт —
-  `design/icon-concepts/build-assets.py` (PIL, 4× суперсэмплинг; SVG-конвертера нет)
-
-- 2026-07-23 — **Иконка выбрана: K6f**, гриф в ромбе, семейство с AsbestosGuard
-  (`0584856`). Отклонённые лежат рядом: мои K1–K6 в `king/`, Codex Sol V1–V4 в
-  `family/`, первые 4 концепта в корне `icon-concepts/`. Витрины сравнения —
-  `contact-sheet.png`, `k6-refine2.png`, `k6-geometry.png`
-
-- 2026-07-22 — 4 концепта иконки показаны Вугару, выбор отложен. SVG + разбор
-  сохранены в `design/icon-concepts/`, чтобы новая сессия не перерисовывала
 
 > Более ранние записи — `archive/gym-tracker-mobile-2026-07-23.md`
 

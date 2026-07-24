@@ -3,6 +3,24 @@
 Старые записи Done кампании `gym-tracker-mobile` — вытеснены из основного файла
 (лимит 10 записей). Всё это уже в `main`.
 
+- 2026-07-23 — **Сайт поддержки живой:** https://hasanovvug-gif.github.io/gymbar/ и
+  `/privacy.html`. Исходники `site/*.html` в `main`, публикация с ветки `gh-pages`.
+  Оба URL отвечают 200 — можно вписывать в ASC
+- 2026-07-23 — **iOS build #7 собран успешно** (`bcaef92`, IPA готов в EAS). Сборки 4–5
+  падали на `npm ci`; починено пересборкой lockfile и пином Node 24
+- 2026-07-23 — Карточка App Store на трёх языках: `docs/appstore/metadata.md`
+  (имя **Gymbar**, subtitle, keywords, описания RU/UA/EN)
+- 2026-07-23 — **Ассеты иконки собраны** (`a9891f1`): `icon.png` 1024 (фон `#0B0C0E`),
+  `adaptive-icon.png` (прозрачный передний слой, арт ужат до 66 % — safe zone Android),
+  `splash-icon.png` 512 прозрачный, `favicon.png` 196. Скрипт —
+  `design/icon-concepts/build-assets.py` (PIL, 4× суперсэмплинг; SVG-конвертера нет)
+- 2026-07-23 — **Иконка выбрана: K6f**, гриф в ромбе, семейство с AsbestosGuard
+  (`0584856`). Отклонённые лежат рядом: мои K1–K6 в `king/`, Codex Sol V1–V4 в
+  `family/`, первые 4 концепта в корне `icon-concepts/`. Витрины сравнения —
+  `contact-sheet.png`, `k6-refine2.png`, `k6-geometry.png`
+- 2026-07-22 — 4 концепта иконки показаны Вугару, выбор отложен. SVG + разбор
+  сохранены в `design/icon-concepts/`, чтобы новая сессия не перерисовывала
+
 - 2026-07-22 — Звук вместо голоса в rest-таймере (`expo-audio` + сгенерированный
   трёхтоновый `rest-done.wav`, играет на беззвучном) + сплошная тактильность:
   примитив `Tappable` (press-scale + haptics), анимация тоггла/таб-точки,
