@@ -2,12 +2,21 @@
 campaign: gym-tracker-mobile
 status: active
 started: 2026-07-22
-updated: 2026-07-24 21:10
+updated: 2026-07-24 22:40
 ---
 
 # Gym Tracker → Expo/React Native
 
 ## Где сейчас
+
+**Фаза 3 (Cloudflare Worker) написана и локально проверена (`9d7197c`) — ждёт деплоя Вугаром.**
+`worker/` — единственная серверная часть: `POST /supplement-scan` (фото + заметка → Gemini → карточка добавки),
+ключ Gemini только на сервере, модель и промпт зафиксированы. Защита: токен-фильтр, тело ≤ 6 МБ / ≤ 3 фото /
+≤ 1.5 МБ на фото / заметка ≤ 500, rate-limit 10/мин на IP + 40/мин глобально, таймаут 30 с, повторная
+валидация ответа модели (мусор обнуляется и уезжает в `missingFields`). Проверено на `wrangler dev` с
+заглушкой Gemini: 12 guard-кейсов + 3 сбоя апстрима + burst 14 запросов (ровно 10 → 429). `tsc` = 0.
+**Осталось Вугару:** `wrangler login`, два секрета, `deploy` + spend cap (рецепт в `worker/README.md`).
+Клиентскую проводку (URL/токен в приложении) делаем в Фазе 4, где она нужна.
 
 **Фаза 2 (сохранность) реализована и запушена (`b366b6d`, `e7f302c`, `80001af`) — ждёт device-теста.**
 Импорт истории с валидацией/бэкапом + iCloud KV для конфига (настройки + добавки + **план тренировок** —
@@ -38,15 +47,27 @@ JS через expo-audio (как уже работал финал), locked/backg
 
 1. [ ] **Device-тест Фазы 2** — нужен новый билд (две новые нативные зависимости: `expo-document-picker`,
    модуль `gymbar-icloud-kv`). Проверить: импорт файла из iCloud Drive, переустановка → настройки/добавки/
-   план вернулись сами, строка статуса «iCloud: синхронизировано». Дальше по спеке: §4 Cloudflare Worker →
-   §2 AI-ввод добавок → §3.3 AI-анализ.
-2. [ ] **(Фон) Дождаться одобрения 1.0** (build #2, `WAITING_FOR_REVIEW`); после релиза → версия **1.0.1**
+   план вернулись сами, строка статуса «iCloud: синхронизировано».
+2. [ ] **Задеплоить Worker** (Фаза 3): `cd worker && npx wrangler login` → `wrangler secret put GEMINI_API_KEY`
+   (ключ ОТДЕЛЬНОГО Gemini-проекта) → `secret put APP_TOKEN` → `wrangler deploy` → spend cap (Google billing +
+   Cloudflare AI Gateway). Рецепт: `worker/README.md`. Дальше §2 AI-ввод добавок → §3.3 AI-анализ.
+3. [ ] **(Фон) Дождаться одобрения 1.0** (build #2, `WAITING_FOR_REVIEW`); после релиза → версия **1.0.1**
    с build #6 (Live Activity, уже VALID в ASC), экспортный комплаенс → на ревью (`asc.py` / UI ASC).
 
 > **Решение Вугара (24.07):** build #2 (без Live Activity) идёт как 1.0 — не трогаем текущее ревью.
 > Live Activity (build #6) уедет апдейтом 1.0.1 (влита в `main` `95b79a7`, проверена в TestFlight).
 
 ## Done (recent first, max 10)
+
+- 2026-07-24 — **Фаза 3: Cloudflare Worker-прокси написан мной и проверен локально** (`9d7197c`).
+  `worker/` (wrangler.jsonc + `src/index.ts` guards + `src/scan.ts` схема/промпт/санитайзер + README с рецептом
+  деплоя). Модель `gemini-3.5-flash` (сверил по докам: 2.0 отключены 01.06.2026), structured output через
+  `response_schema`, заметка пользователя обёрнута в `<user_note>` как данные с запретом исполнять инструкции.
+  Верификация: `wrangler dev` + node-заглушка Gemini — 401/405/400×6/413×2 по guard-кейсам, 502
+  `upstream_error`, 502 `invalid_ai_response`, 504 при недоступном Gemini, burst 14 запросов = ровно 10 × 200
+  затем 429; грязный ответ модели (form «syrup», `servingsPerContainer: -3`, `http://` ссылка, unit «gr»,
+  slot «night», time «25:99», лишнее поле `systemPrompt`) вычищен полностью. **Не задеплоен** — нужен
+  `wrangler login` и ключ Gemini от Вугара.
 
 - 2026-07-24 — **Фаза 2 (сохранность) реализована Codex Sol (Sol/high, фон) и проверена мной.**
   Бриф `/tmp/codex-gym-phase2-durability.md`. Часть A: `utils/importData.ts` + общий валидатор
@@ -131,7 +152,7 @@ JS через expo-audio (как уже работал финал), locked/backg
 - [x] **Фаза 1 — двухступенчатый звук** (спека §1) — сделано, принято Вугаром (`e4b776b`)
 - [x] **Фаза 2 — сохранность** (§3): iCloud KV конфиг (native-модуль) + безопасный импорт истории — код готов,
       ждёт device-теста
-- [ ] **Фаза 3 — Cloudflare Worker** (§4): прокси + spend cap + лимиты
+- [x] **Фаза 3 — Cloudflare Worker** (§4): код готов и проверен локально (`9d7197c`); **деплой + spend cap за Вугаром**
 - [ ] **Фаза 4 — AI-ввод добавок** (§2): image-picker, предпросмотр, контракт Gemini, агрегированные напоминания
 - [ ] **Фаза 5 (позже) — AI-анализ** (§3.3)
 - [ ] Дождаться сборки в TestFlight и поставить на телефон
@@ -268,7 +289,7 @@ JS через expo-audio (как уже работал финал), locked/backg
 
 - Branch: **`main`**, дерево чистое, всё запушено. Ветка `feat/live-activity` слита и удалена.
 - Worktree: `~/Documents/Projects/Gym-Tracker`
-- Last commit: `80001af` (Фаза 2 — сохранность). Брифы Codex: `/tmp/codex-gym-phase2-durability.md`,
+- Last commit: `9d7197c` (Фаза 3 — Cloudflare Worker, не задеплоен). Брифы Codex: `/tmp/codex-gym-phase2-durability.md`,
   ранее `/tmp/codex-gym-phase1-sound.md`. Ключевое ранее: звук `e4b776b`, спека v2 `e049d2d`,
   merge LA `95b79a7`, time-aware кнопка `6f81653`
 - **Билд после Фазы 2 обязателен** — добавились нативные `expo-document-picker` и модуль `gymbar-icloud-kv`;
