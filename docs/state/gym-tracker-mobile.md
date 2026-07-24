@@ -28,11 +28,14 @@ Apple Developer, provisioning-профили созданы (automatic signing).
 
 ## Next step
 
-1. [ ] **Submit build с Live Activity в App Store** (идёт): `npx eas-cli submit --platform ios --latest --non-interactive`.
-2. [ ] В ASC привязать сборку к версии, App Privacy / экспортный комплаенс → отправить на ревью.
+1. [ ] **Дождаться одобрения 1.0** (build #2, без Live Activity, сейчас `WAITING_FOR_REVIEW`).
+2. [ ] После релиза 1.0 → создать версию **1.0.1**, прикрепить **build #6** (уже VALID в ASC, с Live
+   Activity), экспортный комплаенс → на ревью. Прикрепление build к версии можно сделать через
+   `asc.py` или в UI ASC.
 
-> Live Activity влита в `main` (merge `95b79a7`) и **собрана в EAS** (build с виджетом, ~build #5 —
-> первые 3 попытки упали на credentials, см. Done). Time-aware кнопка проверена на iPhone.
+> **Решение Вугара (24.07):** build #2 (без Live Activity) идёт как 1.0 — не трогаем текущее ревью,
+> релиз выйдет раньше. Live Activity (build #6) уедет отдельным апдейтом 1.0.1.
+> Live Activity влита в `main` (merge `95b79a7`), собрана и загружена в ASC (build #6, VALID).
 
 ## Done (recent first, max 10)
 
