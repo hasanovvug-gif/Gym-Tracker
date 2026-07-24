@@ -4,16 +4,8 @@ import { ReasonTag } from '@/types/workout';
 import { en } from './en';
 import { ru } from './ru';
 import { ua } from './ua';
-import './uaImportTranslations';
-import './icloudTranslations';
 
-export type Dict = Omit<typeof ru, 'settings'> & {
-  settings: typeof ru.settings & {
-    icloudSynced: string;
-    icloudUnavailable: string;
-    icloudNever: string;
-  };
-};
+export type Dict = typeof ru;
 type Section = keyof Dict;
 export type TranslationKey = { [S in Section]: `${S}.${Extract<keyof Dict[S], string>}` }[Section];
 type Params = Record<string, string | number>;
