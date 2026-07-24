@@ -2,20 +2,26 @@
 campaign: gym-tracker-mobile
 status: active
 started: 2026-07-22
-updated: 2026-07-24 22:40
+updated: 2026-07-25 00:05
 ---
 
 # Gym Tracker → Expo/React Native
 
 ## Где сейчас
 
-**Фаза 3 (Cloudflare Worker) написана и локально проверена (`9d7197c`) — ждёт деплоя Вугаром.**
-`worker/` — единственная серверная часть: `POST /supplement-scan` (фото + заметка → Gemini → карточка добавки),
-ключ Gemini только на сервере, модель и промпт зафиксированы. Защита: токен-фильтр, тело ≤ 6 МБ / ≤ 3 фото /
-≤ 1.5 МБ на фото / заметка ≤ 500, rate-limit 10/мин на IP + 40/мин глобально, таймаут 30 с, повторная
-валидация ответа модели (мусор обнуляется и уезжает в `missingFields`). Проверено на `wrangler dev` с
-заглушкой Gemini: 12 guard-кейсов + 3 сбоя апстрима + burst 14 запросов (ровно 10 → 429). `tsc` = 0.
-**Осталось Вугару:** `wrangler login`, два секрета, `deploy` + spend cap (рецепт в `worker/README.md`).
+**Фаза 3 (Cloudflare Worker) задеплоена, но НЕ достроена — висят два секрета.**
+Адрес прода: **`https://gymbar-ai-proxy.hasanov-dev.workers.dev`** (аккаунт `hasanov.vug@gmail.com`,
+workers.dev-поддомен `hasanov-dev`). Проверено вживую: `GET /health` → 200 `{"ok":true}`,
+`POST /supplement-scan` без токена → 401. Код `9d7197c`, локально прогнан на `wrangler dev` с заглушкой
+Gemini: 12 guard-кейсов + 3 сбоя апстрима + burst 14 запросов (ровно 10 → 429), `tsc` = 0.
+
+**Хвост на следующую сессию (по порядку):**
+1. `cd worker && npx wrangler secret put APP_TOKEN` — значение уже лежит единственной строкой в
+   `mobile/.env` (`EXPO_PUBLIC_AI_PROXY_TOKEN`, в git не попадает). Сейчас секрет в воркере ему НЕ равен.
+2. Старый ключ Gemini **скомпрометирован** (уехал в имя секрета, светился открытым текстом; мусорный
+   секрет я удалил) → удалить его в AI Studio, создать новый, залить `npx wrangler secret put GEMINI_API_KEY`.
+3. Боевой прогон `/supplement-scan` с реальным фото этикетки + spend cap (Google billing + AI Gateway,
+   рецепт в `worker/README.md`).
 Клиентскую проводку (URL/токен в приложении) делаем в Фазе 4, где она нужна.
 
 **Фаза 2 (сохранность) реализована и запушена (`b366b6d`, `e7f302c`, `80001af`) — ждёт device-теста.**
@@ -48,9 +54,9 @@ JS через expo-audio (как уже работал финал), locked/backg
 1. [ ] **Device-тест Фазы 2** — нужен новый билд (две новые нативные зависимости: `expo-document-picker`,
    модуль `gymbar-icloud-kv`). Проверить: импорт файла из iCloud Drive, переустановка → настройки/добавки/
    план вернулись сами, строка статуса «iCloud: синхронизировано».
-2. [ ] **Задеплоить Worker** (Фаза 3): `cd worker && npx wrangler login` → `wrangler secret put GEMINI_API_KEY`
-   (ключ ОТДЕЛЬНОГО Gemini-проекта) → `secret put APP_TOKEN` → `wrangler deploy` → spend cap (Google billing +
-   Cloudflare AI Gateway). Рецепт: `worker/README.md`. Дальше §2 AI-ввод добавок → §3.3 AI-анализ.
+2. [ ] **Дозалить секреты воркера** (Фаза 3, воркер уже в проде): `APP_TOKEN` (значение в `mobile/.env`) +
+   новый `GEMINI_API_KEY` (старый отозвать) → боевой прогон с фото → spend cap. См. блок «Где сейчас».
+   Дальше §2 AI-ввод добавок → §3.3 AI-анализ.
 3. [ ] **(Фон) Дождаться одобрения 1.0** (build #2, `WAITING_FOR_REVIEW`); после релиза → версия **1.0.1**
    с build #6 (Live Activity, уже VALID в ASC), экспортный комплаенс → на ревью (`asc.py` / UI ASC).
 
@@ -66,8 +72,8 @@ JS через expo-audio (как уже работал финал), locked/backg
   Верификация: `wrangler dev` + node-заглушка Gemini — 401/405/400×6/413×2 по guard-кейсам, 502
   `upstream_error`, 502 `invalid_ai_response`, 504 при недоступном Gemini, burst 14 запросов = ровно 10 × 200
   затем 429; грязный ответ модели (form «syrup», `servingsPerContainer: -3`, `http://` ссылка, unit «gr»,
-  slot «night», time «25:99», лишнее поле `systemPrompt`) вычищен полностью. **Не задеплоен** — нужен
-  `wrangler login` и ключ Gemini от Вугара.
+  slot «night», time «25:99», лишнее поле `systemPrompt`) вычищен полностью. Вечером задеплоен Вугаром
+  на `https://gymbar-ai-proxy.hasanov-dev.workers.dev` (health 200, 401 без токена); секреты не дозалиты.
 
 - 2026-07-24 — **Фаза 2 (сохранность) реализована Codex Sol (Sol/high, фон) и проверена мной.**
   Бриф `/tmp/codex-gym-phase2-durability.md`. Часть A: `utils/importData.ts` + общий валидатор
@@ -163,6 +169,18 @@ JS через expo-audio (как уже работал финал), locked/backg
 - [ ] Проверить splash на нативной сборке (`expo prebuild` + `run:ios`) после замены ассетов
 
 ## Decisions (non-obvious, durable)
+
+- 2026-07-24: **`wrangler secret put` без имени секрета — ловушка.** Первым он спрашивает ИМЯ, и если
+  вслепую вставить туда ключ, ключ окажется именем секрета: значение не задано, а сам ключ виден
+  открытым текстом в `wrangler secret list` и в дашборде (имена секретов не скрываются) → ключ считать
+  скомпрометированным и перевыпускать. Всегда писать имя в самой команде:
+  `npx wrangler secret put GEMINI_API_KEY`, тогда спросят только `Enter a secret value`.
+  Проверка «то ли залито»: `npx wrangler secret list` показывает только имена — если там что-то похожее
+  на ключ, это авария. Удаление: `npx wrangler secret delete <имя>` (в неинтерактивном шелле сам берёт «yes»).
+- 2026-07-24: **локальная симуляция rate-limit в `wrangler dev` не восстанавливается по времени** —
+  счётчик по ключу живёт в `.wrangler/state` и переживает рестарт, окно 60 с локально не отсчитывается.
+  Проверять лимиты только на свежих ключах (`cf-connecting-ip: <новый IP>` на запрос), иначе тесты
+  валидации утонут в ложных 429. В проде лимит ведёт себя штатно.
 
 - 2026-07-24: **iCloud KV — один блоб, а не ключ-на-поле.** Конфиг (`settings` + `supplements` + `workoutDays`)
   лежит под единственным ключом `gymbar.config.v1` как `{schemaVersion, updatedAt, ...}`; конфликт решается
@@ -289,7 +307,7 @@ JS через expo-audio (как уже работал финал), locked/backg
 
 - Branch: **`main`**, дерево чистое, всё запушено. Ветка `feat/live-activity` слита и удалена.
 - Worktree: `~/Documents/Projects/Gym-Tracker`
-- Last commit: `9d7197c` (Фаза 3 — Cloudflare Worker, не задеплоен). Брифы Codex: `/tmp/codex-gym-phase2-durability.md`,
+- Last commit: Фаза 3 — Worker `9d7197c`, в проде на `gymbar-ai-proxy.hasanov-dev.workers.dev`, секреты не дозалиты. Брифы Codex: `/tmp/codex-gym-phase2-durability.md`,
   ранее `/tmp/codex-gym-phase1-sound.md`. Ключевое ранее: звук `e4b776b`, спека v2 `e049d2d`,
   merge LA `95b79a7`, time-aware кнопка `6f81653`
 - **Билд после Фазы 2 обязателен** — добавились нативные `expo-document-picker` и модуль `gymbar-icloud-kv`;
